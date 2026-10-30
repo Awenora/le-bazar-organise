@@ -5,7 +5,7 @@ import {PrivateMedia} from './media.mjs';
 import {encodeCache,decodeCache} from './cache-codec.mjs';
 import {applyPublicationVisuals} from './publication-visuals.mjs';
 import {applyAllMonthVisuals} from './publication-seasonal-visuals.mjs';
-import {importRecipeByLink,fetchImportedImage} from './recipe-import-client.mjs';
+import {importRecipeByLink,fetchImportedImage} from './recipe-import-client.mjs?v=edge-import-20261030-2';
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
 const isCache=k=>k.startsWith('bazar-cloud-cache:');
 const store={getItem:k=>{const raw=native.get.call(localStorage,k);return isCache(k)?decodeCache(raw):raw;},setItem:(k,v)=>native.set.call(localStorage,k,isCache(k)?encodeCache(v):v)};
