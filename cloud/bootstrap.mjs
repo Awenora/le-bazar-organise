@@ -3,6 +3,7 @@ import {CloudEngine} from './engine.mjs';
 import {createBackend} from './backend.mjs';
 import {PrivateMedia} from './media.mjs';
 import {encodeCache,decodeCache} from './cache-codec.mjs';
+import {applyPublicationVisuals} from './publication-visuals.mjs';
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
 const isCache=k=>k.startsWith('bazar-cloud-cache:');
 const store={getItem:k=>{const raw=native.get.call(localStorage,k);return isCache(k)?decodeCache(raw):raw;},setItem:(k,v)=>native.set.call(localStorage,k,isCache(k)?encodeCache(v):v)};
@@ -84,6 +85,7 @@ try{
     };
     dialog.showModal();await new Promise(resolve=>dialog.querySelector('#cloudContinue').onclick=()=>{const next=structuredClone(engine.state);next.startupDivergence=false;engine.persist(next);dialog.close();resolve();});
   }
+  applyPublicationVisuals(engine);
   uiSnapshot=engine.view();
   const bridge=window.BazarCloud={engine,client,backend,household:household.id,patch,
     initialData:uiSnapshot,view:()=>engine.view(),uiSnapshot:()=>structuredClone(uiSnapshot),
