@@ -5,6 +5,7 @@ import {PrivateMedia} from './media.mjs';
 import {encodeCache,decodeCache} from './cache-codec.mjs';
 import {applyPublicationVisuals} from './publication-visuals.mjs';
 import {applyAllMonthVisuals} from './publication-seasonal-visuals.mjs';
+import {importRecipeByLink,fetchImportedImage} from './recipe-import-client.mjs';
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
 const isCache=k=>k.startsWith('bazar-cloud-cache:');
 const store={getItem:k=>{const raw=native.get.call(localStorage,k);return isCache(k)?decodeCache(raw):raw;},setItem:(k,v)=>native.set.call(localStorage,k,isCache(k)?encodeCache(v):v)};
@@ -94,6 +95,7 @@ try{
     applied:value=>{uiSnapshot=structuredClone(value);},
     status:'local',
     reconnect:login,
+    importRecipeByLink:url=>importRecipeByLink(client,url),
     async sync(){
       if(bridge.syncing){bridge.syncAgain=true;return bridge.syncing;}
       bridge.syncing=(async()=>{
@@ -111,9 +113,12 @@ try{
           let blob;
           try{blob=await fetch(image.value).then(r=>{if(!r.ok)throw Error();return r.blob();});}
           catch(error){
-            if(!['127.0.0.1','localhost'].includes(location.hostname)||!/^https?:/.test(image.value))throw Error('Nouvelle image non accessible ; conservée localement.');
-            const cached=await fetch('/api/cache-recipe-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:image.value})}).then(r=>{if(!r.ok)throw Error('Photo non récupérée ; version locale conservée.');return r.json();});
-            blob=await fetch(cached.photo).then(r=>r.blob());
+            if(!/^https?:/.test(image.value))throw Error('Nouvelle image non accessible ; conservée localement.');
+            if(!['127.0.0.1','localhost'].includes(location.hostname))blob=await fetchImportedImage(client,image.value);
+            else{
+              const cached=await fetch('/api/cache-recipe-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:image.value})}).then(r=>{if(!r.ok)throw Error('Photo non récupérée ; version locale conservée.');return r.json();});
+              blob=await fetch(cached.photo).then(r=>r.blob());
+            }
           }
           await backend.newImage(blob,[{path:image.path,recipeId:image.recipeId,originalReference:image.value.startsWith('data:')?'inline-preserved-in-shared-data':image.value}]);
         }
