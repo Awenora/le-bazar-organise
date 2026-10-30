@@ -1,0 +1,5 @@
+.ingredient-replacement-access{margin:3px 0 3px 8px;font-size:.85em;max-width:100%;white-space:normal}
+#replacementNew[hidden]{display:none!important}
+#replacementError:empty{display:none}
+.replacement-routing{margin:8px 0}
+@media(max-width:480px){.ingredient-replacement-access{margin-left:0}}

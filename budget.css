@@ -1,0 +1,179 @@
+#budgetPage{width:100%;max-width:1040px;margin:0 auto;padding:12px 14px 20px;color:#392d24;font:15px/1.45 'Segoe UI',Arial,sans-serif}
+#budgetPage .budget-page-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 14px;background:none;min-height:0;border:0;box-shadow:none}
+#budgetPage h2{font:600 22px/1.3 'Segoe UI',Arial,sans-serif;margin:0}
+#budgetCommands,#budgetPeriod{display:flex;align-items:center;gap:9px}#budgetPeriod>span{text-transform:capitalize;white-space:nowrap}
+#budgetPage button{font:inherit;color:#493322;border:1px solid #b79c7c80;border-radius:9px;box-shadow:none;background:#fff4e29c;padding:6px 10px;line-height:1.3}
+#budgetPage button:hover{background:#ecd6b7!important}#budgetPage button:focus-visible{outline:2px solid #805230;outline-offset:2px}
+#budgetBoard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(300px,1.25fr) minmax(240px,1fr);gap:16px;height:710px;position:relative;align-items:stretch}
+#budgetAccount{grid-column:1;grid-row:1/3}#budgetContributions{grid-column:2;grid-row:1}#budgetThreeMonths{grid-column:2;grid-row:2}
+#budgetPage .budget-panel{--budget-font-size:15px;--budget-title-size:18px;--budget-title-color:#49382a;--budget-row-space:9px;--budget-separator:#b79c7c55;--budget-income:#517c5e;--budget-expense:#a05242;--budget-date-width:65px;--budget-operation-width:210px;--budget-amount-width:100px;--budget-month-width:85px;--budget-person-width:120px;--budget-bar-height:10px;--budget-person-gap:17px;--budget-name-size:15px;--budget-amount-size:15px;--budget-legend-size:12px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:18px 16px;background:rgba(255,245,226,.86);border:1px solid #b79c7c80;border-radius:17px;color:#392d24;overflow:auto;font-size:var(--budget-font-size)}
+#budgetPage .budget-panel h3{font-weight:600;line-height:1.3;font-size:var(--budget-title-size);font-family:inherit;color:var(--budget-title-color);margin:0}
+#budgetPage .budget-panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto;background:none;border:0;box-shadow:none;padding:0;min-height:0;color:inherit}
+#budgetPage .budget-mini{font-size:19px;border:0;background:transparent!important;min-width:28px;min-height:28px;padding:0 4px}
+#budgetPage .budget-balance{text-align:center;flex:0 0 auto;padding:12px 0 24px;border-bottom:1px solid var(--budget-separator)}
+#budgetPage .budget-balance>span{display:block;font-size:14px}#budgetPage .budget-balance>strong{display:block;font-size:28px;font-weight:650;margin-top:5px;font-variant-numeric:tabular-nums}
+#budgetPage .budget-scroll{min-height:0;overflow:auto;scrollbar-width:thin;flex:1}
+#budgetPage table{border-collapse:collapse;margin-inline:auto;width:100%;line-height:1.35;color:inherit;font-size:inherit}
+#budgetPage .budget-ledger{max-width:calc(var(--budget-date-width) + var(--budget-operation-width) + var(--budget-amount-width));table-layout:fixed}
+#budgetPage th,#budgetPage td{padding:var(--budget-row-space) 5px;border-bottom:1px solid var(--budget-separator);text-align:left;vertical-align:middle;overflow-wrap:anywhere}
+#budgetPage th{font-size:12px;font-weight:500}#budgetPage .budget-amount,#budgetPage th:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#budgetPage .budget-income{color:var(--budget-income)}#budgetPage .budget-expense{color:var(--budget-expense)}
+#budgetPage .budget-date-col{width:var(--budget-date-width)}#budgetPage .budget-label-col{width:var(--budget-operation-width)}#budgetPage .budget-money-col{width:var(--budget-amount-width)}
+#budgetAccountCommands{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;flex:0 0 auto;margin:0;padding:4px 0 0;background:none;border:0;color:inherit;font-size:13px}
+#budgetPage [data-budget-edit],#budgetOpeningRow{cursor:pointer}#budgetPage [data-budget-edit]:hover,#budgetOpeningRow:hover{background:#ead2b13b}
+#budgetPage .budget-bars{display:flex;flex-direction:column;gap:var(--budget-person-gap);padding-top:5px}
+#budgetPage .budget-person{min-width:0;flex:0 0 auto}#budgetPage .budget-bar-label{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;margin:0 0 6px;padding:0;border:0;border-radius:0;background:transparent!important;text-align:left;font-size:var(--budget-name-size)}
+#budgetPage .budget-bar-label span:last-child{font-size:var(--budget-amount-size);font-variant-numeric:tabular-nums;white-space:nowrap}
+#budgetPage .budget-track{display:flex;overflow:hidden;border-radius:9px;background:#9e876b2b;height:var(--budget-bar-height);min-height:6px}
+#budgetPage .budget-segment{display:block;flex:0 0 auto;min-width:0;min-height:0;height:100%;border:0;border-radius:0;padding:0;margin:0;box-shadow:none;cursor:pointer}
+#budgetPage .budget-legend{display:flex;flex-wrap:wrap;gap:5px 12px;font-size:var(--budget-legend-size);line-height:1.3}
+#budgetPage .budget-legend>span{display:inline-flex;gap:5px;align-items:center}#budgetPage .budget-legend i,.budget-dialog .budget-dot{display:inline-block;width:10px;height:10px;flex:0 0 10px;border-radius:3px;vertical-align:middle}
+#budgetPage .budget-three-months{table-layout:fixed}#budgetPage .budget-person-col{width:var(--budget-person-width)}#budgetPage .budget-month-col{width:var(--budget-month-width)}#budgetPage .budget-three-months th:not(:first-child){text-align:right}
+.budget-dialog{width:min(760px,94vw);max-height:90dvh;padding:22px;color:#392d24;font:15px/1.45 'Segoe UI',Arial,sans-serif}
+.budget-dialog h2{font:600 22px/1.3 'Segoe UI',Arial,sans-serif;margin:0 0 16px}.budget-dialog h3{font:600 17px/1.4 'Segoe UI',Arial,sans-serif}
+.budget-dialog label{display:flex;flex-direction:column;gap:4px;margin-block:9px}.budget-dialog input,.budget-dialog select{font-size:15px;width:100%;min-height:38px;color:#392d24;background:#fff9ef}
+.budget-dialog .budget-form-grid,.budget-dialog .budget-history-filters{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.budget-dialog .budget-wide{grid-column:1/-1}
+.budget-dialog .budget-check{display:flex;flex-direction:row;align-items:center;gap:8px}.budget-dialog .budget-check input{width:18px;height:18px;min-height:18px;margin:0;flex:0 0 18px}
+.budget-dialog .budget-modal-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.budget-dialog button{font-size:15px;color:#493322;padding:7px 12px;border-radius:8px}
+.budget-dialog .budget-error{color:#9a4738;font-size:14px}.budget-dialog .budget-modal-scroll{max-height:60dvh;overflow:auto;margin-block:12px}
+.budget-dialog table{width:100%;border-collapse:collapse;font-size:14px}.budget-dialog th,.budget-dialog td{padding:9px 6px;border-bottom:1px solid #b79c7c55;text-align:left;vertical-align:top}.budget-dialog .budget-amount{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.budget-dialog td small{display:block;margin-top:4px;font-size:12px;line-height:1.5}.budget-dialog .budget-dot{margin-right:5px}.budget-dialog [data-budget-edit]{cursor:pointer}.budget-dialog [data-budget-edit]:hover{background:#ead2b13b}
+.budget-dialog details{margin-block:10px}.budget-dialog details>summary{padding:7px;border-radius:7px;cursor:pointer;font-size:15px}.budget-dialog .budget-annual-categories{padding-left:18px}.budget-dialog .budget-entity-list>div{display:grid;grid-template-columns:1.5fr 1fr auto;gap:10px;border-bottom:1px solid #b79c7c55;align-items:center}
+.visual-editing #budgetPage .budget-panel{outline:1px solid #80523055}.visual-editing #budgetPage [data-visual-selected]{outline:2px solid #805230}
+#budgetStyleControls{border-top:1px solid #b79c7c80;padding-top:12px;margin-top:12px}#budgetStyleControls h3{font-size:16px;margin-block:8px}#budgetStyleControls input[type=checkbox]{width:18px;height:18px}
+@media(max-width:850px){#budgetPage{padding:10px 5px 20px}#budgetBoard{height:auto;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:12px}#budgetAccount,#budgetContributions,#budgetThreeMonths{grid-column:1;grid-row:auto;min-height:280px}#budgetAccount{min-height:510px}#budgetPage .budget-panel{padding:16px 12px}#budgetPage .budget-page-heading{flex-wrap:wrap}#budgetPage .budget-panel table{table-layout:auto}.budget-dialog .budget-form-grid,.budget-dialog .budget-history-filters{grid-template-columns:1fr}.budget-dialog .budget-entity-list>div{grid-template-columns:1fr auto}.budget-dialog .budget-entity-list .budget-check{grid-column:1/-1}.budget-dialog{padding:16px}}
+
+#budgetBoard.budget-reflow{grid-template-rows:minmax(0,1fr)}
+#budgetBoard.budget-reflow>.budget-panel{grid-column:auto;grid-row:auto}
+#budgetBoard.budget-reflow[data-visible-panels="1"]{grid-template-columns:minmax(0,1fr)}
+#budgetBoard.budget-reflow[data-visible-panels="0"]{height:0;min-height:0}
+
+@media(max-width:850px){#main:has(#budgetPage){margin-left:0;width:100%;padding-inline:8px}}
+
+/* Budget-only refinements: retain the board dimensions and stationary controls. */
+#budgetPage .budget-page-heading{justify-content:flex-end;flex:0 0 auto}
+#budgetPage .budget-panel[data-budget-stripes="true"] tbody>tr:nth-child(odd),#budgetPage #budgetContributions[data-budget-stripes="true"] .budget-person:nth-child(odd){background:var(--budget-stripe-odd)}
+#budgetPage .budget-panel[data-budget-stripes="true"] tbody>tr:nth-child(even),#budgetPage #budgetContributions[data-budget-stripes="true"] .budget-person:nth-child(even){background:var(--budget-stripe-even)}
+#budgetPage .budget-panel{overflow:hidden}
+#budgetPage .budget-scroll{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;overflow-anchor:none}
+.budget-dialog{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+body:has(dialog.budget-dialog[open]) #main:has(#budgetPage){overflow:hidden!important}
+@media(min-width:851px){#main:has(#budgetPage){overflow:hidden!important;overflow-anchor:none}#budgetPage{height:100%;max-height:100%;overflow:hidden;display:flex;flex-direction:column}#budgetBoard{flex:0 0 auto}}
+@media(max-width:850px){#budgetPage #budgetAccount{height:510px}#budgetPage #budgetContributions,#budgetPage #budgetThreeMonths{height:280px}}
+
+/* Only Budget: compact month control, independent panel typography and columns. */
+#budgetPage{max-width:none}
+#budgetPage .budget-month-anchor{display:flex;justify-content:flex-end;flex:0 0 auto;margin-bottom:14px;background:none;border:0;box-shadow:none;min-height:0}
+#budgetPage #budgetBoard{width:min(1012px,100%);align-self:center}
+#budgetPage .budget-row-menu{float:right;padding:0 3px;border:0;background:transparent;line-height:1;min-width:22px}
+#budgetPage th,#budgetPage td{padding-inline:var(--budget-column-gap,5px);border-bottom-width:var(--budget-separator-width,1px)}
+#budgetPage .budget-balance{border-bottom-width:var(--budget-separator-width,1px)}
+#budgetPage .budget-bar-label>span:first-child{color:var(--budget-name-color,#493322)}
+#budgetPage .budget-person[hidden],#budgetPage .budget-legend>span[hidden]{display:none!important}
+#budgetPage .budget-three-months col:nth-child(2){width:var(--budget-month-1,var(--budget-month-width))}
+#budgetPage .budget-three-months col:nth-child(3){width:var(--budget-month-2,var(--budget-month-width))}
+#budgetPage .budget-three-months col:nth-child(4){width:var(--budget-month-3,var(--budget-month-width))}
+
+.budget-dialog .budget-entity-list fieldset{border:1px solid #b79c7c55;border-radius:9px;margin:10px 0;padding:8px}.budget-dialog .budget-entity-list fieldset>div{display:grid;grid-template-columns:1.5fr 1fr auto;gap:10px;align-items:center;border-bottom:1px solid #b79c7c55}
+
+/* Keep the month's coordinate system stable when its child becomes absolute. */
+#budgetPage #budgetCommands{width:100%;min-width:0;flex:1 1 auto;justify-content:flex-end}
+#budgetPage #budgetPeriod{flex:0 0 auto;border-radius:9px}
+#budgetPage .budget-ledger{max-width:none;width:100%}
+
+#budgetPage #budgetAccount thead th,#budgetPage #budgetThreeMonths thead th{font-size:var(--budget-header-size,12px)}
+
+/* New default third column; saved free-position layouts retain their geometry. */
+@media(min-width:851px){#budgetPage #budgetBoard:not([data-shared-layout="free"]){width:min(1288px,100%);grid-template-columns:minmax(0,1fr) minmax(0,1fr) 260px}#budgetCategories{grid-column:3;grid-row:1/3}#budgetPage:has(#budgetBoard[data-shared-layout="free"]){overflow-x:auto}}
+#budgetCategories .budget-category-table{table-layout:fixed}
+#budgetCategories thead th{font-size:var(--budget-header-size,12px)}
+#budgetCategories [data-budget-category-row]{cursor:pointer}
+#budgetCategories [data-budget-category-row]:focus-visible{outline:2px solid #805230;outline-offset:-2px}
+#budgetCategories [data-budget-category-row][hidden]{display:none}
+#budgetCategories .budget-category-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:middle;flex:none}
+#budgetCategories .budget-category-total{display:flex;justify-content:space-between;gap:8px;flex:0 0 auto;padding-top:10px;border-top:var(--budget-separator-width,1px) solid var(--budget-separator);font-size:inherit}
+#budgetCategories .budget-category-total strong{white-space:nowrap}
+@media(max-width:850px){#budgetCategories{grid-column:1;grid-row:auto;height:510px;min-height:280px}}
+
+#budgetCategories .budget-category-table .budget-label-col{width:65%}
+#budgetCategories .budget-category-table .budget-money-col{width:35%}
+@media(min-width:851px){
+#budgetPage #budgetBoard[data-shared-layout="free"]{width:min(1288px,100%)}
+#budgetPage #budgetBoard[data-budget-legacy-free="true"]{width:min(1012px,100%)}
+#budgetPage #budgetBoard.budget-reflow:not([data-shared-layout="free"])[data-visible-panels="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+#budgetPage #budgetBoard.budget-reflow:not([data-shared-layout="free"])[data-visible-panels="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+#budgetPage #budgetBoard.budget-reflow:not([data-shared-layout="free"])[data-visible-panels="1"]{grid-template-columns:minmax(0,1fr)}
+#budgetBoard.budget-reflow #budgetCategories{grid-column:auto;grid-row:auto}
+}
+
+.budget-dialog .budget-person-summary .budget-row-menu{display:inline-block;float:none;font:inherit;line-height:1.2;color:inherit;width:auto;height:auto;min-width:22px;min-height:22px;padding:0 3px;margin:0 0 0 8px;vertical-align:baseline;border:0;border-radius:4px;background:transparent;box-shadow:none}
+
+/* The category total belongs to its panel, not the site's floating footer. */
+#budgetCategories .budget-category-total{position:static!important;inset:auto!important;transform:none;float:none;width:100%;max-width:none;box-sizing:border-box;display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;flex:0 0 auto;margin:0;padding:10px 0 0;background:transparent;box-shadow:none;border-radius:0;text-align:left;color:inherit;font:inherit}
+
+.visual-editing #budgetContributions .budget-person{cursor:grab}.visual-editing #budgetContributions .budget-person:active{cursor:grabbing}
+
+#budgetContributions .budget-bar-label>.budget-participant-name{color:var(--budget-name-color,#493322);margin-right:auto}
+.visual-editing #budgetContributions .budget-person,.visual-editing #budgetContributions .budget-bar-label,.visual-editing #budgetContributions .budget-segment{cursor:grab;touch-action:none;user-select:none;-moz-user-select:none}
+.visual-editing #budgetContributions .budget-participant-grip{display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;width:18px;height:22px;font-size:18px;line-height:1;color:#805230;border-radius:4px;background:#e5cfad66;cursor:grab;touch-action:none;user-select:none}
+.visual-editing #budgetContributions .budget-bar-label:active{cursor:grabbing}
+
+#budgetPage .budget-panel-title>[data-budget-title]{min-width:0;flex:1}
+#budgetPage .budget-panel-options{flex:0 0 24px;min-width:24px;min-height:22px;width:24px;height:22px;font-size:18px;line-height:1;padding:0;border:0;background:transparent;box-shadow:none;color:inherit}
+.budget-panel-menu{position:fixed;z-index:100050;display:flex;flex-direction:column;min-width:210px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;padding:5px;background:#fff5e7;border:1px solid #b79c7c;border-radius:10px;box-shadow:0 5px 18px #49332226;color:#493322;font:15px/1.4 'Segoe UI',sans-serif}
+.budget-panel-menu>button{display:block;width:100%;padding:9px 12px;border:0;border-radius:5px;text-align:left;color:inherit;background:transparent;font:inherit;white-space:normal}
+.budget-panel-menu>button:hover,.budget-panel-menu>button:focus-visible{background:#ead7ba;outline:1px solid #b79c7c}
+body:has(#budgetPage) #visualEditorPanel [hidden]{display:none!important}
+#visualEditorPanel .budget-panel-setting-section{margin:10px 0;border-top:1px solid #b79c7c66;padding-top:8px}
+#visualEditorPanel .budget-panel-setting-section>summary{cursor:pointer;font-weight:600;color:#493322;padding:5px 0}
+#visualEditorPanel .budget-all-settings{margin:10px 0}
+
+#budgetPage .budget-panel thead th{font-weight:var(--budget-header-weight,500)}
+#budgetPage .budget-balance>span,#budgetPage .budget-category-total>span,#budgetPage .budget-bar-label>.budget-participant-name,#budgetPage .budget-legend{font-weight:var(--budget-subtitle-weight,inherit)}
+
+/* Budget settlement estimates: preserve panel geometry and internal scrolling. */
+#budgetAccount .budget-balance{padding:8px 0 12px}
+#budgetAccount .budget-estimate{display:flex;justify-content:space-between;gap:12px;text-align:left;margin:6px 0;font-size:.88em}
+#budgetAccount .budget-estimate b{font-size:var(--budget-amount-size,15px);white-space:nowrap}
+#budgetPage .budget-balance>small,#budgetPage .budget-context{display:block;font-size:.78em;opacity:.82;margin:4px 0 8px}
+#budgetPage .budget-status{font-size:.75em;opacity:.8}
+#budgetPage .budget-category-table td small,#budgetPage .budget-category-total small{display:block;font-size:.72em;line-height:1.35;white-space:normal;font-weight:normal}
+
+/* Family ledger: separate label, category, payer and row action. */
+#budgetAccount .budget-ledger{min-width:calc(var(--budget-date-width) + var(--budget-operation-width) + var(--budget-payer-width,80px) + var(--budget-amount-width) + 28px)}
+#budgetAccount .budget-ledger .budget-label-col{width:var(--budget-operation-width)}
+#budgetAccount .budget-payer-col{width:var(--budget-payer-width,80px)}
+#budgetAccount .budget-actions-col{width:28px}
+#budgetAccount .budget-operation-label{display:block;line-height:1.3}
+#budgetAccount .budget-operation-category{display:block;margin-top:4px;font-size:.8em;line-height:1.25;opacity:.8}
+#budgetAccount .budget-payer{padding-inline:10px;white-space:normal}
+#budgetAccount .budget-row-action{padding-inline:0;text-align:center}
+#budgetAccount .budget-row-menu{float:none;display:inline-flex;align-items:center;justify-content:center;font:inherit;width:26px;min-width:26px;height:26px;min-height:26px;padding:0;margin:0;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+#budgetAccount .budget-row-menu:hover{background:transparent!important;color:#805230}
+
+
+/* Existing Budget actions stay accessible above form fields. */
+#dialog.budget-dialog .budget-top-actions{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;background:#fff7e8;padding:8px 0;margin:0 0 12px}
+#visualEditorPanel .budget-editor-top-actions{position:sticky;top:0;z-index:5;background:#fff3df;padding:8px 0;margin:0 0 10px;border-top:0}
+
+.visual-editing #budgetThreeMonths [data-budget-food-caption]{cursor:pointer;outline:1px dashed #a0805770;outline-offset:3px}
+#budgetCaptionControls label{display:block;margin:10px 0;font-size:14px}
+#budgetCaptionControls :is(input:not([type=checkbox]),select){display:block;width:100%;box-sizing:border-box}
+#budgetCaptionControls button{display:block;width:100%;margin:8px 0}
+
+/* Budget editor: keep form actions outside the movable title bar. */
+body:has(#budgetPage) #visualEditorPanel .visual-window-head{flex-wrap:wrap;gap:5px}
+body:has(#budgetPage) #visualEditorPanel .visual-window-head h2{flex:1 0 100%;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+body:has(#budgetPage) #visualEditorPanel .visual-window-head>div{width:100%;justify-content:flex-end}
+body:has(#budgetPage) #visualEditorPanel>.budget-editor-top-actions{display:grid;grid-template-columns:minmax(0,1fr);width:100%;box-sizing:border-box;position:static}
+body:has(#budgetPage) #visualEditorPanel>.budget-editor-top-actions button{width:100%;min-width:0;white-space:normal;overflow-wrap:normal;box-sizing:border-box}
+
+/* Direct Budget controls exist only in the existing personalization session. */
+.visual-editing #budgetPage [data-budget-direct]{cursor:pointer;outline:1px dotted #a0805740;outline-offset:-1px}
+.visual-editing #budgetPage [data-budget-direct-selected]{outline:2px solid #98643a;outline-offset:-2px}
+.visual-editing #budgetPage th[data-budget-direct]{position:relative}
+.budget-direct-column-handle{position:absolute;right:-4px;top:0;bottom:0;width:9px;z-index:4;cursor:col-resize;touch-action:none;border-right:2px solid #9c6c3e;box-sizing:border-box}
+.budget-direct-column-handle:focus-visible{outline:2px solid #805230}
+#budgetDirectControls label{display:block;margin:9px 0;font-size:14px}
+#budgetDirectControls :is(input:not([type=checkbox]),select){display:block;width:100%;box-sizing:border-box}
+#budgetDirectControls button{display:block;width:100%;margin:8px 0}
+#budgetDirectControls p{font-size:12px;overflow-wrap:anywhere}

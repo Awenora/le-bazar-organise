@@ -1,0 +1,16 @@
+.courses-primary-table .courses-table-heading{gap:6px}.courses-primary-table .courses-table-heading>div{flex:1}
+.courses-primary-table .courses-table-heading h3{font-weight:700}
+.courses-primary-category>summary{font-weight:700;padding:7px 9px;cursor:pointer;border-bottom:1px solid #b69b7644}
+.courses-primary-category[hidden]{display:none!important}
+.courses-primary-category .courses-line{margin:0}
+.courses-primary-category{min-width:0}
+.courses-recipe-provenance,.courses-shop-provenance{display:block;font-weight:400;font-size:.78em;line-height:1.3;margin-top:3px}
+#coursesSecondaryMenu{position:relative}#coursesSecondaryMenu>summary{list-style:none;padding:7px 13px;border:1px solid #b69b76;border-radius:9px;background:#fff3dfaa;cursor:pointer}
+#coursesSecondaryMenu:not([open])>.courses-secondary-content{display:none!important}
+.courses-secondary-content{position:absolute;right:0;top:100%;z-index:45;min-width:230px;max-width:min(90vw,420px);max-height:65vh;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:7px;background:#fff3dff5;border:1px solid #b69b76;border-radius:10px}
+.courses-context-notice{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:50;max-width:90vw;font-size:.88em;padding:7px 12px;background:#fff3dfed;border-radius:8px}
+.course-category-settings{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:6px 0}
+.courses-secondary-content .courses-add-store{display:flex;flex-direction:column}
+@media(max-width:700px){.courses-primary-table{max-width:100%;box-sizing:border-box}.courses-primary-table .courses-line{min-width:0}.courses-recipe-provenance{overflow-wrap:anywhere}.courses-list-toolbar{gap:6px}.courses-arrow-nav{max-width:100%;font-size:.9em}}
+
+#listUndo[data-available="false"]{display:none!important}

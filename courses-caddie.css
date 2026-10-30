@@ -1,0 +1,1 @@
+.cart-row{display:grid;grid-template-columns:36px 90px 1fr;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #b38b6655}.cart-row input{width:28px;height:28px}.cart-undo{background:#fff3dfdb;padding:8px 10px;border-radius:8px;margin-bottom:10px;width:fit-content}.cart-undo button{margin-left:8px}

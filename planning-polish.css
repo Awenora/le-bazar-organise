@@ -1,0 +1,23 @@
+/* Numéro conservé sur l'image, sans bandeau qui réduit sa hauteur. */
+.planning-view .calendar .day .dayhead{position:absolute;left:0;right:0;top:0;z-index:3;height:24px!important;min-height:0!important;background:transparent!important;border:0;box-shadow:none;pointer-events:none}
+.planning-view .calendar .day .dayhead>*{pointer-events:auto}
+.planning-view .calendar .day .dayhead>b{background:#fff5e3d9;color:#3c291d!important;border-radius:4px;padding:0 3px;line-height:20px;text-shadow:none}
+.planning-view .calendar .day.current .dayhead>b{background:var(--month-accent);color:#fff7e8!important}
+.planning-view .calendar .day .day-handle{background:#fff5e3b5;color:#65482e!important;line-height:18px}
+.planning-view .calendar .day .day-meals{padding-top:0}
+.planning-view .calendar .day .meal-slot:first-child .meal-period{top:26px}
+.planning-view .calendar .day .meal-slot:first-child .photo-cook{top:26px}
+.planning-view .calendar .day>.evening{left:4px;right:auto;bottom:4px;z-index:4;padding:0 4px;min-width:22px;line-height:20px}
+.planning-view .calendar .meal-slot .meal-title,.planning-view .calendar .split-day .meal-slot .meal-title{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden!important;text-overflow:ellipsis;white-space:normal;min-height:0;max-height:calc(2.6em + 8px);line-height:1.3;padding:4px 25px 4px 4px}
+.planning-view .calendar .day:not(.split-day) .meal-title{padding-left:29px!important;padding-right:25px!important;padding-bottom:4px!important}
+/* Corbeille fermée à la hauteur exacte de Des idées ; contenu vers le haut. */
+.planning-view .planner-tools #trashZone,.image-month .planner-tools #trashZone{box-sizing:border-box;height:var(--ideas-height,40px);min-height:var(--ideas-height,40px);max-height:var(--ideas-height,40px);top:var(--ideas-top,auto);bottom:auto;justify-content:center;padding:3px 5px;overflow:visible!important}
+.trash-heading{position:relative;gap:3px}.trash-heading>strong{flex:1;min-width:0}.trash-menu{position:relative;flex:0 0 auto}.trash-menu>summary{cursor:pointer;list-style:none;font-size:21px;line-height:23px;padding:0 3px}.trash-menu>summary::-webkit-details-marker{display:none}.trash-menu>div{position:absolute;right:0;top:100%;min-width:140px;z-index:20;background:#fff5e7;border:1px solid #b58d66;border-radius:6px;padding:4px}.trash-menu button{width:100%;font-size:12px;padding:5px!important;border:0;background:transparent;white-space:normal}
+/* Deux onglets solidaires, séparés par un seul trait. */
+.planning-view .side-panel>.tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0;margin:0 0 8px;border:1px solid #b88d66;border-radius:8px;overflow:hidden;box-shadow:none;min-height:40px}
+.planning-view .side-panel>.tabs>button{margin:0;border:0!important;border-radius:0!important;box-shadow:none!important;min-height:40px;padding:7px 5px;background:#f8e9d4b0!important;color:#745235;font-size:15px;transform:none}
+.planning-view .side-panel>.tabs>button+button{border-left:1px solid #b88d66!important}
+.planning-view .side-panel>.tabs>button.active{background:#fff5e6ed!important;color:#59371f;font-weight:700;box-shadow:inset 0 -2px 0 #bd9169!important}
+.side-filter-toolbar{display:flex;align-items:flex-start;gap:4px;min-width:0;margin:7px 0;flex:0 0 auto}
+.catalog-side .side-filter-toolbar>.filters{flex:1;min-width:0;margin:0;max-height:88px;overflow:auto;padding:0}
+.side-category-menu{position:relative;flex:0 0 auto;z-index:10}.side-category-menu>summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:27px;height:29px;border:1px solid #c5a17a;border-radius:6px;font-size:23px;line-height:1;background:#fff3e0b0}.side-category-menu>summary::-webkit-details-marker{display:none}.side-category-menu>div{position:absolute;right:0;top:calc(100% + 3px);z-index:10;min-width:205px;padding:4px;background:#fff5e7;border:1px solid #b58d66;border-radius:6px;box-shadow:0 3px 8px #39231133}.side-category-menu button{display:block;width:100%;text-align:left;font-size:13px;border:0;background:transparent;padding:7px 8px}.side-category-menu button:hover{background:#ead4b979}

@@ -1,0 +1,20 @@
+/* Ajustements demandés sur la v21 ; dimensions du planning inchangées. */
+@media(min-width:951px){
+ header{padding-left:var(--calendar-left,calc(var(--month-edge,0px) + 36px))}
+ header .brand{position:absolute;left:var(--calendar-center,45vw);top:50%;transform:translate(-50%,-50%);margin:0;max-width:none;justify-self:auto}
+ #navigationHome,.planning-view #navigationHome{width:var(--nav-space,28vw);max-width:var(--nav-space,28vw);justify-self:start}
+ #globalNav{justify-content:flex-start}
+}
+@media(max-width:950px){#navigationHome,.planning-view #navigationHome{margin-left:calc(var(--calendar-left,90px) - 8px);width:calc(100vw - var(--calendar-left,90px) - 16px)}header .brand{justify-self:center}}
+select.profile{max-width:170px;cursor:pointer}
+.catalog-side>.side-notebook-label{display:block;font-size:13px;flex-shrink:0;margin-bottom:8px}
+.side-notebook-label select{display:block;width:100%;margin-top:4px;padding:7px;border:1px solid #b38c64;border-radius:7px;background:#fff7e9c4;color:#523622}
+.recipe-destination{background:#fff1dab3;border-radius:7px;padding:8px 10px}.import-help{line-height:1.5;max-width:560px}#prefillRecipe{font-weight:600}#recipeImportStatus:empty{display:none}.open-notebook .catalog-heading{margin-top:12px}
+
+/* Correction ciblée : centrage sur jeudi et Des idées sur la largeur réelle de la grille. */
+@media(min-width:951px){header .brand{grid-area:auto;right:auto;bottom:auto;width:max-content;left:var(--calendar-center,45vw);top:50%;transform:translate(-50%,-50%)}}
+.planning-view .planner-tools #parkingZone{grid-column:1 / -1;justify-self:start;box-sizing:border-box;width:var(--calendar-width,calc(100% - 48px));max-width:none;margin-left:var(--ideas-offset,24px)}
+
+/* Corbeille sur la même ligne que Des idées. */
+.planning-view .planner-tools #trashZone,.image-month .planner-tools #trashZone{top:var(--ideas-top,auto);bottom:auto}
+

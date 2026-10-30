@@ -1,0 +1,15 @@
+/* Cadre fixe commun aux rubriques, sans bande sous le paysage. */
+html{height:100%;overflow:hidden;overscroll-behavior:none}
+body{height:100vh;height:100dvh;min-height:0;max-height:100dvh;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none}
+body>header{flex:0 0 auto}
+body>#main{flex:1 1 0;align-self:stretch;min-height:0;max-height:none;margin-right:0;margin-bottom:0;overflow:auto;overscroll-behavior:contain;padding-bottom:6px}
+body>footer{display:none!important}
+body.seasonal-site,body.image-month{background-attachment:scroll!important}
+/* Les zones longues gardent leur accès à la souris, au tactile et au clavier. */
+html,body,body *{scrollbar-width:none!important}
+html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.free-stock-workspace{height:100%;min-height:0;display:flex;flex-direction:column}
+.free-stock-workspace>.stock-toolbar{flex:0 0 auto}
+.free-stock-workspace>.free-stock-viewport{height:auto;min-height:0;flex:1 1 0}
+.free-stock-workspace>.stock-empty{flex:0 0 auto}
+@media(min-width:851px){.planning-view #main>.layout{height:100%!important;min-height:0!important}.planning-view #main>.layout>.month-panel{min-height:0;height:auto}.planning-view #main>.layout>.side-panel{min-height:0;height:auto}}

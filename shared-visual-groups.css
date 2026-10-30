@@ -1,0 +1,10 @@
+.visual-editing [data-shared-owner]{outline:1px solid #80523026!important;outline-offset:1px;touch-action:none;cursor:grab}
+.visual-editing [data-shared-owner][data-visual-selected]{outline:1px solid #805230!important}
+.shared-item-resize{position:absolute;right:0;bottom:0;width:11px;height:11px;border-right:2px solid #805230;border-bottom:2px solid #805230;cursor:nwse-resize;touch-action:none;z-index:5;opacity:.45}
+[data-shared-owner][data-visual-selected]>.shared-item-resize{opacity:1}
+#sharedGroupControls{border-top:1px solid #b38b66;padding-top:8px}
+#sharedGroupControls input{max-width:100%;box-sizing:border-box}
+#sharedGroupControls details{padding:6px 0}
+#sharedGroupControls details>label,#recipeAlignmentSettings>label{display:block;margin:6px 0}
+.visual-editing [data-site-visual-key]:not([data-visual-selected]){outline:1px solid #8052301a!important}
+.visual-editing [data-visual-selected]{outline:1px solid #805230!important}

@@ -1,0 +1,5 @@
+.shopping-quantity{display:grid;gap:4px;margin:5px 0;color:#38281c;line-height:1.4}
+.shopping-quantity small{font-size:12px;color:inherit}.shopping-quantity .purchase-edit{text-align:left;font-size:13px;white-space:normal;padding:5px 8px;line-height:1.45}
+.shopping-quantity .purchase-manual{font-weight:600}.recipe-save-top{display:flex;gap:12px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;background:#fff2df;padding:6px 34px 6px 0}.recipe-save-top h2{margin:0}.recipe-save-top button{flex-shrink:0}
+.bazar-action-menu{z-index:22000;max-height:calc(100vh - 24px);overflow:auto}.planning-view .edit-dots{position:relative;z-index:3;touch-action:manipulation}
+.recipe-save-top>.primary{color:#38281c!important;background:rgba(230,201,164,.85)!important;font-weight:600;border:1px solid #b38b66}

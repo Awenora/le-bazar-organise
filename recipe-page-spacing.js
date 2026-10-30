@@ -1,0 +1,8 @@
+/* Espacements de la page Recettes uniquement ; les positions internes et les cartes restent inchangées. */
+const recipePageSpacingConfigBefore=recipeGroupConfig;
+recipeGroupConfig=function(){const cfg=recipePageSpacingConfigBefore(),raw=recipeGroupPrefs().recipeToolbarGroup?.modes?.[recipeGroupMode()];if(raw?.bottomGap===undefined)cfg.bottomGap=6;
+ // Keep the three existing right-hand commands inside the restored page.
+ const group=$('#catalog .recipe-layout-group');if(!visualEditSession&&cfg.layout==='free'&&group?.clientWidth>0){const ids=['search','sort','categories'].filter(id=>{const p=cfg.items[id];return p&&!p.hidden&&Number.isFinite(p.x)&&p.width;});if(ids.length){const right=Math.max(...ids.map(id=>cfg.items[id].x+cfg.items[id].width)),shift=Math.max(0,right-group.clientWidth);if(shift){for(const id of ids)cfg.items[id]={...cfg.items[id],x:Math.max(0,cfg.items[id].x-shift)};const other=Object.entries(cfg.items).filter(([id,p])=>!ids.includes(id)&&!p.hidden&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.width&&p.height).map(([,p])=>p),overlap=ids.some(id=>other.some(p=>recipeGroupTools.overlaps(cfg.items[id],p)));if(overlap){const top=Math.max(0,...other.map(p=>p.y+p.height))+cfg.rowGap,min=Math.min(...ids.map(id=>cfg.items[id].y||0));for(const id of ids)cfg.items[id].y=(cfg.items[id].y||0)+top-min;}}}}
+ return cfg;};
+const recipePageSpacingStyle=document.createElement('style');recipePageSpacingStyle.id='recipePageSpacingStyle';recipePageSpacingStyle.textContent='#main > .panel:has(> #catalog){padding-top:6px}';document.head.append(recipePageSpacingStyle);
+if(page==='Recettes'){const group=$('#catalog .recipe-layout-group');if(group)applyRecipeGroupLayout(group);}

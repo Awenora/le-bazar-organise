@@ -1,0 +1,6 @@
+.visual-page-choices{flex-wrap:wrap}
+.visual-page-choices [aria-pressed=true]{font-weight:700;border-color:#8c6543}
+#visualEditorPanel select{display:block;width:100%;font-size:12px;margin-top:5px;padding:6px}
+#visualEditorPanel input[type=color]{display:block;width:100%;height:30px;padding:2px;margin-top:5px}
+.visual-editing [data-site-visual-key]{outline:1px dashed #75543d!important;outline-offset:-2px}
+.visual-editing [data-visual-selected]{outline:3px solid #714523!important;outline-offset:-3px}

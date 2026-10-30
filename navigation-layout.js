@@ -1,0 +1,29 @@
+/* Navigation-only geometry: persist the resting box, render the active lift. */
+const navigationMetricsCache=new WeakMap();
+function navigationMetrics(el){
+ const cs=getComputedStyle(el),key=[cs.fontFamily,cs.fontSize,cs.lineHeight,el.textContent,el.style.padding].join('|');const prior=navigationMetricsCache.get(el);if(prior?.key===key)return prior;
+ const clone=el.cloneNode(true);clone.removeAttribute('id');clone.querySelectorAll('.shared-item-resize').forEach(h=>h.remove());clone.classList.remove('active');clone.removeAttribute('aria-current');
+ for(const name of ['height','min-height','max-height','width','min-width','max-width','margin','padding','position','left','top','transform','translate'])clone.style.removeProperty(name);
+ clone.style.setProperty('position','fixed','important');clone.style.setProperty('left','-10000px','important');clone.style.visibility='hidden';clone.style.pointerEvents='none';el.parentElement.append(clone);
+ const normal=clone.offsetHeight;clone.classList.add('active');clone.setAttribute('aria-current','page');const lift=Math.max(0,-parseFloat(getComputedStyle(clone).marginTop)||0);clone.remove();const result={key,normal,lift};navigationMetricsCache.set(el,result);return result;
+}
+function navigationNormalize(group,cfg){if(sharedPrefs().navigationLayoutVersion===1)return cfg;for(const item of group.items){const p=cfg.items[item.id];if(!p)continue;const m=navigationMetrics(item.el);if(m.lift>0&&p.height===m.normal+m.lift&&group.items.some(other=>other!==item&&cfg.items[other.id]?.height===m.normal))p.height=m.normal;}return cfg;}
+const navigationCleanBefore=cleanVisualPreferences;
+cleanVisualPreferences=function(v){const out=navigationCleanBefore(v);if(v?.navigationLayoutVersion===1)out.navigationLayoutVersion=1;return out;};
+const navigationConfigBefore=sharedConfig;
+sharedConfig=function(group){const cfg=navigationConfigBefore(group);return group.entry.id==='navigation'?navigationNormalize(group,cfg):cfg;};
+const navigationRectsBefore=sharedRects;
+sharedRects=function(group){const rects=navigationRectsBefore(group);if(group.entry.id!=='navigation')return rects;const cfg=sharedConfig(group);for(const item of group.items){const r=rects[item.id],p=cfg.items[item.id]||{};if(!r)continue;const active=item.el.matches('.active,[aria-current="page"]'),m=navigationMetrics(item.el);if(!Number.isFinite(p.y)&&active)r.y+=m.lift;if(!p.height&&active)r.height=Math.max(1,r.height-m.lift);}return rects;};
+const navigationChangeBefore=sharedChange;
+sharedChange=function(group,fn,redraw=false){if(group.entry.id!=='navigation')return navigationChangeBefore(group,fn,redraw);const current=sharedConfig(group);return navigationChangeBefore(group,c=>{if(visualEditSession.draft.navigationLayoutVersion!==1){for(const [id,p]of Object.entries(current.items)){if(c.items?.[id])c.items[id].height=p.height;}visualEditSession.draft.navigationLayoutVersion=1;}fn(c);},redraw);};
+function navigationPaintBox(el,r){const m=navigationMetrics(el),active=el.matches('.active,[aria-current="page"]');sharedSet(el,{top:(r.y-(active?m.lift:0))+'px',height:(r.height+(active?m.lift:0))+'px'});}
+const navigationApplyBefore=applyVisualPreferences;
+applyVisualPreferences=function(){navigationApplyBefore();const entry=sharedVisualGroups.find(g=>g.id==='navigation'),group=entry&&sharedNodes(entry);if(!group||sharedConfig(group).layout!=='free')return;const rects=sharedRects(group);for(const item of group.items)if(rects[item.id])navigationPaintBox(item.el,rects[item.id]);};
+const navigationDragBefore=recipeFreeDrag;
+recipeFreeDrag=function(d,e){navigationDragBefore(d,e);if(d.group?.id==='globalNav'&&d.preview)navigationPaintBox(d.frame,d.preview);};
+/* Budget is appended after the base render. Place it synchronously instead of
+   waiting for the next animation frame (which may be delayed in Firefox). */
+function navigationPlaceAddedBudget(button){const entry=sharedVisualGroups.find(g=>g.id==='navigation'),group=entry&&sharedNodes(entry);if(!group)return;const cfg=sharedConfig(group);if(cfg.layout!=='free')return;const saved=cfg.items.budgetNavButton||{};if(saved.hidden||saved.removed){sharedSet(button,{display:'none'});return;}let r={x:saved.x,y:saved.y,width:saved.width||button.offsetWidth,height:saved.height||navigationMetrics(button).normal};if(!Number.isFinite(r.x)||!Number.isFinite(r.y)){const occupied=group.items.filter(i=>i.el!==button).map(i=>cfg.items[i.id]).filter(p=>p&&!p.hidden&&!p.removed&&Number.isFinite(p.x)&&Number.isFinite(p.y));r={...r,...componentTools.arrange([{id:'budgetNavButton',width:r.width,height:r.height}],group.root.clientWidth,8,occupied).budgetNavButton};}sharedSet(button,{'box-sizing':'border-box',position:'absolute',left:r.x+'px',right:'auto',bottom:'auto',margin:'0',transform:'none',translate:'none',flex:'none',width:r.width+'px','min-width':'0','max-width':'none','min-height':'0','max-height':'none',overflow:'auto'});if(saved.label)button.textContent=saved.label;for(const [prop,key,unit]of [['font-size','fontSize','px'],['padding','padding','px'],['color','color',''],['border-radius','radius','px']])if(saved[key]!==undefined&&(key!=='fontSize'||saved[key]>0))sharedSet(button,{[prop]:saved[key]+unit});if(saved.background||saved.alpha!==undefined){const hex=saved.background||'#fff3df',rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));sharedSet(button,{background:'rgba('+rgb.join(',')+','+(saved.alpha??73)/100+')'});}navigationPaintBox(button,r);}
+const navigationBudgetCreateBefore=budgetNavigation;
+budgetNavigation=function(){const previous=document.getElementById('budgetNavButton');navigationBudgetCreateBefore();const button=document.getElementById('budgetNavButton');if(button&&button!==previous)navigationPlaceAddedBudget(button);};
+if(document.getElementById('budgetNavButton'))navigationPlaceAddedBudget(document.getElementById('budgetNavButton'));

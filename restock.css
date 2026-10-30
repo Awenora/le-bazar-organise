@@ -1,0 +1,7 @@
+.restock-config{margin:12px 0;padding:10px;border:1px solid #b79c7c88;border-radius:8px;color:inherit}.restock-config legend{font-weight:600}.restock-config small{display:block;font-size:12px}
+.course-free-board .restock-purchase-row .courses-inline-quantity{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.course-free-board .restock-purchase-row .restock-buy-steps{display:flex;gap:2px;align-items:center}
+.course-free-board .restock-purchase-row .restock-buy-steps button{display:inline-flex;align-items:center;justify-content:center;width:18px;min-width:18px;height:18px;min-height:18px;padding:0!important;font:14px/1 'Segoe UI',sans-serif;color:#493322;background:#fff4e2;border:1px solid #b79c7c99;border-radius:4px;box-shadow:none}
+.restock-reference-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #b79c7c66}.restock-reference-row>span{min-width:0}.restock-reference-row small{display:block;font-size:12px}
+.course-free-board .restock-purchase-row>.courses-inline-quantity{flex-direction:column!important;gap:0!important}
+.course-free-board .restock-purchase-row>.courses-inline-quantity input{flex:0 0 27px!important}

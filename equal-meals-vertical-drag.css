@@ -1,0 +1,31 @@
+/* Même grille mensuelle pour zéro, un ou deux repas ; aucune hauteur naturelle d'image. */
+.planning-view #calendar.calendar{grid-template-rows:28px repeat(var(--rows),minmax(0,1fr))!important}
+.planning-view .calendar .day,.planning-view .calendar .day.split-day{height:100%!important;min-height:0!important;max-height:100%;overflow:hidden}
+.planning-view .calendar .day .day-meals{display:grid!important;grid-template-rows:minmax(0,1fr)!important;flex:1 1 0%!important;min-height:0!important;height:100%;overflow:hidden}
+.planning-view .calendar .day.split-day .day-meals{grid-template-rows:repeat(2,minmax(0,1fr))!important}
+.planning-view .calendar .day .meal-slot,.planning-view .calendar .day.split-day .meal-slot{min-height:0!important;min-width:0;height:100%!important;overflow:hidden}
+.planning-view .calendar .day .meal-slot>.meal,.planning-view .calendar .day .meal-slot>.emptyday{display:block!important;position:relative;height:100%!important;min-height:0!important;width:100%;max-height:100%;overflow:hidden}
+.planning-view .calendar .day .meal img,.planning-view .calendar .day.split-day .meal img{position:absolute!important;inset:0;width:100%!important;height:100%!important;min-height:0!important;max-height:100%;display:block!important;object-fit:cover!important}
+.planning-view .calendar .day .meal-title{min-height:0!important;max-height:2.5em;overflow:hidden!important;line-height:1.2;-webkit-line-clamp:2}
+/* Commandes des recettes sur une seule ligne, recherche flexible et courte. */
+.recipe-toolstrip{display:flex!important;flex-wrap:nowrap!important;width:min(100%,860px);max-width:100%;gap:8px;overflow-x:auto}
+.recipe-toolstrip .recipe-compact-search,.catalog-side .recipe-toolstrip .recipe-compact-search{flex:1 1 260px!important;min-width:65px;max-width:340px}
+.recipe-toolstrip .recipe-compact-search .search{width:100%;min-width:0;max-width:none;font-size:13px}
+.recipe-toolstrip>button,.recipe-toolstrip>#addRecipe{flex:0 0 auto;padding:6px 9px!important;font-size:13px!important}
+.catalog-side .recipe-toolstrip{gap:5px;padding:6px}.catalog-side .recipe-toolstrip>button{font-size:12px!important;padding:5px 6px!important}
+/* Un même fond translucide ; l'onglet actif se prolonge de cinq pixels vers le haut. */
+#globalNav button,#globalNav button.active,#globalNav button[aria-current=page]{background:rgba(255,243,223,.40)!important;color:#2c1b10!important}
+@media(min-width:951px){#globalNav{align-items:flex-end}#globalNav button.active,#globalNav button[aria-current=page]{padding-top:12px!important;margin-top:-5px;transform:none!important}}
+.planning-view .planner-tools #parkingZone,.planning-view .planner-tools #trashZone{background:rgba(255,243,223,.38)!important}
+.planning-view #trashZone #toggleTrash,.planning-view .planner-tools.parking-empty #parkingZone>strong,.planning-view .planner-tools #parkingZone>strong{color:#23150c!important;text-shadow:0 1px 1px #fff5df!important}
+.planning-view .calendar .day.split-day .meal-slot.supper{border-top-width:0!important}
+.planning-view .calendar .day.split-day .meal-slot.supper::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:#fdf8ed;pointer-events:none;z-index:13}
+/* Les poignées de largeur ne doivent jamais replacer une fiche dans le flux. */
+.free-stock-canvas>.free-stock-card.menu-width-resizable{position:absolute!important}
+.recipe-toolstrip{background:transparent!important;border:0!important;box-shadow:none!important}
+#globalNav{background:transparent!important;box-shadow:none!important;overflow:visible!important}
+@media(min-width:951px){#globalNav button.active,#globalNav button[aria-current=page]{padding-top:16px!important;margin-top:-9px;border-radius:8px 8px 0 0!important}}
+.planning-view .side-panel,.planning-view .side-panel .tabs,.planning-view .month-panel>.toolbar,.planning-view .month-context{background:transparent!important;box-shadow:none!important}
+.planning-view .calendar .day .meal-title,.planning-view .calendar .day.split-day .meal-title{bottom:5px!important;box-sizing:content-box!important;max-height:2.4em!important;line-height:1.2!important;padding-top:0!important;padding-bottom:0!important}
+.shop-item>strong>.ingredient-stock-button{display:inline-block;vertical-align:middle;margin:0 0 0 7px!important;padding:1px 5px!important;font-size:11px!important;line-height:1.5;min-height:0;white-space:nowrap;font-weight:400}
+header .brand{pointer-events:none}

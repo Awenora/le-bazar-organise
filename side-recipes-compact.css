@@ -1,0 +1,72 @@
+#side.side-compact-ready{gap:0!important;justify-content:flex-start!important}
+#side .side-compact-controls{display:flex;flex-direction:column;gap:6px;width:100%;max-width:100%;box-sizing:border-box;margin:0 0 8px;flex-shrink:0;transform:none!important;translate:none!important}
+#side .side-compact-row{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;overflow:visible!important;gap:6px;margin:0!important;padding:0!important;border:0!important;background:transparent!important;transform:none!important;translate:none!important}
+#side .side-compact-item{position:relative;display:flex;align-items:center;min-width:32px;max-width:100%;box-sizing:border-box;margin:0!important;transform:none!important;translate:none!important}
+#side .side-compact-item>.recipe-compact-search{width:100%!important;max-width:none!important;min-width:0!important;flex:1 1 auto!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;outline:0!important;transform:none!important;translate:none!important}
+#side .side-compact-item .search{box-sizing:border-box;width:100%!important;max-width:none!important;min-width:0!important;min-height:32px;margin:0!important;border:1px solid #b38b6680!important;border-radius:10px!important;background:rgba(255,243,223,.78)!important;color:#38281c!important;box-shadow:none!important;outline:0!important;line-height:1.25}
+#side .side-compact-item .search:focus-visible{outline:1px solid #805230!important;outline-offset:2px}
+#side .side-compact-item>button{box-sizing:border-box;width:100%;min-width:32px;min-height:32px;border:1px solid #b38b6680;border-radius:9px;background:rgba(255,243,223,.78);color:#38281c;line-height:1.25;white-space:nowrap;margin:0!important;transform:none!important;translate:none!important}
+#side .side-compact-controls>.recipe-category-tabs{display:flex!important;flex-wrap:nowrap!important;align-items:center;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#b38b6660 transparent;max-width:100%;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;transform:none!important;translate:none!important;flex:0 0 auto}
+#side .side-compact-controls>.recipe-category-tabs>button{flex:0 0 auto;white-space:nowrap;padding:5px 9px;line-height:1.25}
+#side .side-compact-controls .quick-filter-grip,#side .side-compact-controls .quick-filter-resize,#side .side-compact-controls .menu-width-handle{display:none!important}
+#side.side-compact-ready>#cards{margin-top:0!important}
+#side .side-compact-controls[hidden],#side .side-compact-item[hidden],#side .side-compact-controls>.recipe-category-tabs[hidden]{display:none!important;pointer-events:none!important}
+.side-notebook-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:300;min-width:215px;max-width:min(300px,80vw);max-height:50vh;overflow:auto;background:#fff3e3f5;border:1px solid #b38b66;border-radius:10px;padding:5px;box-shadow:0 3px 10px #38281c22}
+.side-notebook-menu>button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;white-space:normal;background:transparent;color:#38281c;border:0;border-radius:6px;padding:6px;font-size:14px}
+.side-notebook-menu>button[aria-checked=true]{background:#e8cfae77}.side-notebook-menu>button:focus-visible{outline:1px solid #805230}.side-notebook-avatar{display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;font-size:24px}.side-notebook-avatar img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.visual-editing #side .side-compact-item{outline:1px dashed #805230}.visual-editing #side .side-compact-item[data-visual-selected]{outline:2px solid #805230!important}
+
+#side.catalog-side .cards{flex:0 0 auto;overflow-y:auto;min-height:0;scrollbar-width:thin}
+
+/* Weekly panel only: inline meal labels and compact day spacing. */
+#side.weekly-side .weekmeal .link{display:flex;flex-direction:row;align-items:center;gap:5px;text-align:left}
+#side.weekly-side .weekmeal .link strong{flex:1;min-width:0}
+#side.weekly-side .weekmeal .link small{flex:0 0 auto;white-space:nowrap}
+#side.weekly-side .week-list{justify-content:flex-start;gap:3px}
+#side.weekly-side .weekrow{padding-block:1px;flex:0 0 auto}
+#side.weekly-side .weekmeal{margin-bottom:0}
+@media(min-width:851px){.planning-view .layout>.side-panel{grid-row:1;align-self:stretch;height:auto;min-height:0}}
+
+/* All seven day rows use the same full-width two-column structure. */
+#side.weekly-side .week-list{align-items:stretch}
+#side.weekly-side .weekrow{display:grid;grid-template-columns:35px minmax(0,1fr);width:100%;min-width:0;min-height:0;align-self:stretch}
+#side.weekly-side .weekrow>.date{width:35px;box-sizing:border-box}
+#side.weekly-side .weekrow>.week-dishes{width:100%;min-width:0}
+#side.weekly-side .week-empty .empty-week{display:flex;width:100%;min-height:45px;box-sizing:border-box;align-self:stretch}
+#side.catalog-side .cards{gap:6px}
+
+#side.weekly-side .weekrow>.week-dishes{padding-right:0}
+#side.catalog-side .cards{gap:4px}
+#side.catalog-side .compact-recipe>img{height:82px!important}
+#side.catalog-side .compact-recipe>section{padding:6px!important}
+
+/* Balanced catalogue gutters; day label spans both meals. */
+#side.catalog-side .cards{column-gap:10px;padding-inline:6px;box-sizing:border-box;margin-top:8px}
+#side.weekly-side .weekrow>.date{align-self:stretch;height:auto}
+
+/* Keep the current-day frame identical to the other weekday frames. */
+#side.weekly-side .weekrow.week-current{background:transparent;box-shadow:none}
+#side.weekly-side .weekrow.week-current::after{content:none}
+#side.weekly-side .weekrow.week-current>.date{background:rgba(255,246,228,.72);color:#412f23;border:1px solid #eddbbf70;box-shadow:none}
+#side.weekly-side .weekrow.week-current>.date b{color:inherit}
+#side.weekly-side .weekrow.week-current>.date .week-add-evening{background:#fff4df7d!important;color:#684a2d;border-color:#c6a57d77}
+#side .side-compact-controls[data-shared-layout="free"]{overflow:visible!important}
+/* Empty meal targets stay clickable without stacked labels or inset frames. */
+.planning-view .calendar .day .meal-slot.vacant>.emptyday{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 18px 4px 4px;border:0;box-shadow:none;border-radius:0}
+.planning-view .calendar .day .meal-slot.vacant .meal-period{position:static!important;display:block;margin:0;transform:none;max-width:100%}
+.planning-view .calendar .day .meal-slot.vacant .drop-prompt{position:static;display:block;font-size:11px;line-height:1.2;max-width:100%;padding:2px;text-align:center}
+.planning-view .calendar .day .meal-slot.vacant.supper{box-shadow:none}
+.planning-view .calendar .day .meal-slot.vacant.supper::before{content:none}
+
+#side.weekly-side .weekrow.week-current{outline:none!important}
+#side.weekly-side .weekrow.week-current>.date{background:rgba(255,246,228,.72)!important;color:#412f23!important;border:1px solid #eddbbf70!important;border-radius:5px!important}
+
+#side .side-compact-controls>.recipe-category-tabs{flex-wrap:wrap!important;overflow:visible!important}
+
+/* Only the plus moves when a day contains both meal cards. */
+#side.weekly-side .weekrow:has(.week-dishes>.weekmeal~.weekmeal)>.date>.week-add-evening{margin-top:auto!important;margin-bottom:auto!important}
+.planning-view .calendar .day .meal-slot.vacant:not(.supper) .meal-period{display:none!important}
+
+/* The notebook dropdown must remain legible inside its free-positioned frame. */
+#side [data-side-compact-item="notebook"]{overflow:visible!important}
+#side [data-side-compact-item="notebook"]>#sideCarnetToggle{display:block;box-sizing:border-box;width:100%;height:100%;min-height:0;max-height:100%;padding:4px 6px;font-size:14px;white-space:nowrap;line-height:1.25}

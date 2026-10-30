@@ -1,0 +1,30 @@
+#catalog .recipe-layout-group{display:flex!important;align-items:center!important;box-sizing:border-box;overflow-x:auto!important;overflow-y:visible;transform:none!important;translate:none!important;height:auto!important;min-height:0!important}
+#catalog .recipe-layout-group>.recipe-layout-item{position:relative;display:flex;align-items:stretch;box-sizing:border-box;min-width:32px;max-width:none;transform:none!important;translate:none!important;margin:0!important;order:0!important}
+#catalog .recipe-layout-item[hidden],#catalog .recipe-layout-group[hidden],#catalog .recipe-category-tabs[data-recipe-layout-source]{display:none!important;pointer-events:none!important}
+#catalog .recipe-layout-item>.recipe-compact-search{box-sizing:border-box;margin:0!important;align-self:stretch}
+#catalog .recipe-layout-item>button{box-sizing:border-box;min-width:32px!important;min-height:32px;white-space:normal!important;overflow-wrap:anywhere;line-height:1.25!important;margin:0!important}
+#catalog [data-recipe-layout-kind=filter]>button{padding:7px 11px;border:1px solid #b38b66;border-radius:8px}
+#catalog .recipe-layout-item .search{box-sizing:border-box;min-width:0!important;width:100%!important;max-width:none!important;height:100%;margin:0!important}
+#catalog .recipe-layout-break{flex:0 0 100%;height:0;margin:0;padding:0}
+.visual-editing #catalog .recipe-layout-item{outline:1px dashed #805230;touch-action:none;cursor:grab}
+.visual-editing #catalog .recipe-layout-item[data-visual-selected]{outline:2px solid #805230!important}
+.recipe-layout-resize{position:absolute!important;right:0!important;bottom:0!important;top:auto!important;width:12px!important;height:12px!important;border-right:2px solid #805230;border-bottom:2px solid #805230;cursor:nwse-resize;touch-action:none;z-index:5}
+#catalog [data-layout-drop=before]{border-left:3px solid #805230}#catalog [data-layout-drop=after]{border-right:3px solid #805230}
+.recipe-layout-order{display:flex;gap:4px;align-items:center;margin:5px 0}.recipe-layout-order>button:first-child{flex:1;text-align:left;min-width:0}
+#recipeGroupControls{border-top:1px solid #b38b66;padding-top:8px}#recipeGroupControls fieldset{padding:6px;min-width:0}#recipeGroupControls input{max-width:100%;box-sizing:border-box}
+
+#catalog .recipe-layout-break[hidden]{display:none!important;pointer-events:none!important}
+#catalog .recipe-results-empty,#side .recipe-results-empty{grid-column:1/-1;margin:0;padding:12px 16px;border:1px solid #b38b66;border-radius:8px;background:rgba(255,243,223,.88);color:#38281c;box-sizing:border-box}
+#recipeMealFilters{display:flex;flex-wrap:wrap;gap:10px 16px;margin:10px 0;padding:10px;border:1px solid #b38b66;border-radius:8px}#recipeMealFilters small{flex-basis:100%}
+#catalog .recipe-layout-group[data-layout=free]{position:relative!important;display:block!important;overflow-y:hidden!important}
+#catalog .recipe-layout-group[data-layout=free]>.recipe-layout-item{margin:0!important}
+#catalog .recipe-layout-item[data-free-invalid]{outline:2px solid #ac3f30!important}
+
+#catalog .recipe-layout-group[data-layout=free] .recipe-layout-item>button{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
+
+/* Free placement: guides are transient; unselected controls stay quiet. */
+.visual-editing #catalog .recipe-layout-group[data-layout=free],
+.visual-editing #catalog .recipe-layout-group[data-layout=free] [data-site-visual-key]{outline:none!important}
+.visual-editing #catalog .recipe-layout-group[data-layout=free]>.recipe-layout-item{outline:1px solid #80523026!important;outline-offset:1px}
+.visual-editing #catalog .recipe-layout-group[data-layout=free]>.recipe-layout-item[data-visual-selected]{outline:1px solid #805230!important}
+.visual-editing #catalog .recipe-layout-group[data-layout=free]>.recipe-layout-item:not([data-visual-selected]) .recipe-layout-resize{opacity:.25}

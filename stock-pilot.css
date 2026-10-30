@@ -1,0 +1,43 @@
+/* Tout est limité au tableau pilote ; aucun fond global ni grille imposée. */
+.free-stock-card.stock-visual-pilot{background:rgba(255,245,226,.84);border:1px solid #b38b665c;border-radius:10px;padding:5px 8px 4px;color:#302319;font:15px/1.4 'Segoe UI',Arial,sans-serif;box-shadow:0 2px 6px #38241620}
+.stock-visual-pilot .free-stock-head{gap:5px;min-height:34px;padding:2px 0 5px;border-bottom:1px solid #b38b6650}
+.stock-visual-pilot .free-stock-head>h3{font:700 16px/1.35 'Segoe UI',Arial,sans-serif;color:#302319}
+.stock-visual-pilot .free-stock-head>.free-category-grip{min-width:14px!important;width:14px;flex:0 0 14px;padding:2px 0!important;font-size:15px;opacity:.75}
+.stock-pilot-category-icon{font:23px/1 'Segoe UI Emoji',sans-serif;flex:0 0 24px}
+.stock-visual-pilot .stock-pilot-add{flex:0 0 26px;width:26px;height:27px;margin:0!important;padding:0!important;line-height:25px;font-size:21px;border:1px solid #ac855e35;border-radius:7px;background:#fff5e2aa}
+.stock-visual-pilot .free-stock-head>.stock-actions>summary{width:26px;height:27px;border-radius:7px}
+.stock-visual-pilot .free-col-count{width:48px}.stock-visual-pilot .free-col-format{width:102px}
+.stock-visual-pilot .free-stock-table{font:15px/1.4 'Segoe UI',Arial,sans-serif}
+.stock-visual-pilot .free-stock-table th{font:600 12px/1.4 'Segoe UI',Arial,sans-serif;padding:3px 4px;color:#5f4532}
+.stock-visual-pilot .free-stock-table td{padding:3px 3px;min-height:32px;border-right:1px solid #b6957438;border-bottom:1px solid #b6957442;vertical-align:middle}
+.stock-visual-pilot .free-stock-table tr:last-child td{border-bottom:0}.stock-visual-pilot .free-stock-table td:last-child{border-right:0}
+.stock-visual-pilot .free-stock-table tbody tr:nth-child(odd){background:#fff9ed38}.stock-visual-pilot .free-stock-table tbody tr:nth-child(even){background:#ad7d4610}
+.stock-visual-pilot .free-stock-table [data-free-quantity]{width:32px;min-height:26px;display:block;margin:0 auto;padding:2px 0!important;text-align:center;font:700 16px/1.35 'Segoe UI',Arial,sans-serif;border:1px solid transparent;border-radius:7px;color:#302319;background:#efe4ce}
+.stock-visual-pilot [data-free-quantity][data-stock-level=enough]{background:#d0e6af}.stock-visual-pilot [data-free-quantity][data-stock-level=low]{background:#ffdf9b}.stock-visual-pilot [data-free-quantity][data-stock-level=empty]{background:#ff9f94;color:#4c1710}
+.stock-visual-pilot .free-item-grip{font-size:12px;width:8px;color:#81614a}
+.stock-visual-pilot .free-stock-table [data-free-name]{font:15px/1.4 'Segoe UI',Arial,sans-serif;padding:1px 2px;min-height:25px;max-height:44px;width:100%;color:#302319;letter-spacing:normal}
+.stock-pilot-brand{display:block;font:14px/1.3 'Segoe UI',Arial,sans-serif;color:#5c4634;padding:0 2px;overflow-wrap:anywhere}
+.stock-visual-pilot .stock-pilot-format{position:relative;padding-right:29px!important}
+.stock-visual-pilot .free-stock-table [data-free-format]{font:14px/1.4 'Segoe UI',Arial,sans-serif;text-align:center;padding:1px 0;color:#302319}
+.stock-pilot-row-actions{position:absolute;right:0;top:50%;transform:translateY(-50%);width:25px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.stock-pilot-row-actions .stock-actions>summary{width:23px;height:22px;font-size:18px;line-height:20px}
+.stock-visual-pilot .stock-pilot-row-actions .free-note{position:static;font-size:13px;line-height:17px;min-height:17px;padding:0 2px;margin:0}
+.stock-pilot-fields p{font-size:13px;line-height:1.45;color:#604631}
+/* Compenser le zoom automatique existant pour garder le tableau pilote lisible. */
+.free-stock-card.stock-visual-pilot{min-width:calc(300px / var(--stock-pilot-scale,1))!important}
+.stock-visual-pilot .free-stock-head>h3{font-size:calc(16px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .stock-pilot-category-icon{font-size:calc(23px / var(--stock-pilot-scale,1));flex-basis:calc(24px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .free-col-count{width:calc(48px / var(--stock-pilot-scale,1))}.stock-visual-pilot .free-col-format{width:calc(102px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .free-stock-table th{font-size:calc(12px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .free-stock-table [data-free-quantity]{width:calc(32px / var(--stock-pilot-scale,1));font-size:calc(16px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .free-stock-table [data-free-name]{font-size:calc(15px / var(--stock-pilot-scale,1));max-height:calc(44px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .stock-pilot-brand,.stock-visual-pilot .free-stock-table [data-free-format]{font-size:calc(14px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot td.stock-pilot-format:has(details[open]){z-index:30}
+.stock-pilot-row-actions:has(details[open]){z-index:35}
+.stock-visual-pilot .stock-pilot-add,.stock-visual-pilot .free-stock-head>.stock-actions>summary{width:calc(26px / var(--stock-pilot-scale,1));height:calc(27px / var(--stock-pilot-scale,1));flex-basis:calc(26px / var(--stock-pilot-scale,1));font-size:calc(21px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .free-stock-table [data-free-name]{min-height:calc(24px / var(--stock-pilot-scale,1));max-height:calc(70px / var(--stock-pilot-scale,1))}
+.stock-visual-pilot .stock-pilot-brand{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity]{background:#efe4ce!important}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity][data-stock-level=enough]{background:#d0e6af!important}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity][data-stock-level=low]{background:#ffdf9b!important}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity][data-stock-level=empty]{background:#ff9f94!important;color:#4c1710!important}

@@ -1,0 +1,22 @@
+/* Menu existant, compact, avec défilement interne seulement si nécessaire. */
+#dialog:has(.settings-sections){width:min(620px,calc(100vw - 32px));max-height:85dvh;overflow:auto}
+#dialog>.settings-sections{display:grid;gap:14px;margin-top:12px}
+.settings-section{border-top:1px solid #a8805b65;padding-top:10px;min-width:0}
+.settings-section>h3{font:600 12px/1.4 'Segoe UI',sans-serif;letter-spacing:.7px;color:#65452e;margin:0 0 8px}
+.settings-coming{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:5px 0;font-size:14px}
+.settings-coming small{font-size:11px;background:#b8956d28;border:1px solid #a8805b40;border-radius:5px;padding:1px 6px;white-space:nowrap;color:#6a503b}
+.settings-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.settings-action-grid>button{margin:0;text-align:left;font-size:14px;padding:8px 10px}
+.settings-section>h3:not(:first-child),.settings-section .recipe-archive-settings h3{font-size:14px;letter-spacing:0;margin:8px 0 3px}
+.settings-section>p,.settings-section .recipe-archive-settings p{font-size:13px;line-height:1.4;margin:4px 0 9px}
+.settings-section>.actions{gap:7px;margin:6px 0}
+.settings-section .actions button,.settings-section .recipe-archive-settings button{font-size:13px;padding:7px 10px}
+.settings-section .recipe-archive-settings{margin-top:10px}
+.planning-view .planner-tools #parkingZone,.planning-view .planner-tools #trashZone,.planning-view #trashZone #toggleTrash{background:transparent!important;box-shadow:none!important}
+.planning-view .calendar .day>.calendar-event-tags{top:50%!important;transform:translateY(-50%);max-height:36px;gap:1px;z-index:14}
+.calendar-event-tags button{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;line-height:16px}
+.calendar-event-tags button>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calendar-birthday-icon{font:15px/1 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;flex:0 0 auto}
+@media(max-width:480px){.settings-action-grid{grid-template-columns:1fr}}
+/* Libellés sans halo clair. */
+.planning-view #trashZone #toggleTrash,.planning-view .planner-tools #parkingZone>strong,.planning-view .planner-tools.parking-empty #parkingZone>strong{text-shadow:none!important;-webkit-text-stroke:0!important}

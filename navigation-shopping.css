@@ -1,0 +1,5 @@
+#profile{display:none!important}#familyProfiles{display:flex;grid-area:profile;justify-self:end;align-items:center;gap:5px;margin-right:134px;min-width:0}
+.planning-view .planner-tools #trashZone,.image-month.planning-view .planner-tools #trashZone{height:40px!important;min-height:40px!important;max-height:40px!important;align-self:start}
+.routing-rules{display:grid;gap:12px}.routing-row{display:grid;grid-template-columns:130px 150px minmax(180px,1fr);gap:10px;align-items:center}.routing-row label{display:grid;gap:3px;font-size:12px}.routing-row input,.routing-row select{width:100%;box-sizing:border-box}.routing-ingredient{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}.routing-ingredient select{max-width:180px}
+@media(max-width:950px){#familyProfiles{margin-right:0;gap:3px}}
+@media(max-width:760px){header{grid-template-columns:minmax(0,1fr) auto auto 33px!important;grid-template-areas:'brand brand history settings' 'avatars avatars avatars avatars' 'nav nav nav nav'!important}#familyProfiles{grid-area:avatars;justify-self:center;margin:0;gap:7px}.routing-row{grid-template-columns:1fr}.routing-ingredient{flex-wrap:wrap}}

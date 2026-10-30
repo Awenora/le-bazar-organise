@@ -1,0 +1,19 @@
+.fit-collections .free-stock-viewport{overflow:auto!important;touch-action:pan-x pan-y;scrollbar-width:thin}
+.free-stock-canvas{transform:none!important}
+#main .free-stock-card.stock-visual-pilot{min-width:280px!important;max-width:800px!important;padding:var(--stock-padding,6px)!important;background:var(--stock-background-rgba,rgba(255,245,226,.84))!important;border:calc(var(--stock-borderWidth,1)*1px) solid var(--stock-borderColor,#b38b66)!important;border-radius:calc(var(--stock-radius,10)*1px)!important;color:var(--stock-color,#302319)!important}
+#main .stock-visual-pilot .free-stock-head>h3{font-size:calc(var(--stock-titleSize,16)*1px)!important;color:var(--stock-titleColor,#302319)!important}
+#main .stock-visual-pilot .free-stock-table [data-free-name],#main .stock-visual-pilot .stock-pilot-brand,#main .stock-visual-pilot .free-stock-table [data-free-format]{font-size:calc(var(--stock-fontSize,15)*1px)!important;color:var(--stock-color,#302319)!important}
+#main .stock-visual-pilot .free-stock-table td{height:var(--stock-line-height,32px);padding-left:var(--stock-column-gap,4px)!important;padding-right:var(--stock-column-gap,4px)!important;border-bottom-width:var(--stock-separator,1px);border-right-width:var(--stock-separator,1px);border-color:var(--stock-borderColor,#b38b66)}
+#main .stock-visual-pilot .free-stock-table td.stock-pilot-format{padding-right:29px!important}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity][data-stock-level=enough]{background:var(--stock-enoughColor,#d0e6af)!important}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity][data-stock-level=low]{background:var(--stock-lowColor,#ffdf9b)!important}
+#main .stock-visual-pilot .free-stock-table [data-free-quantity][data-stock-level=empty]{background:var(--stock-emptyColor,#ff9f94)!important}
+.stock-visual-pilot .stock-block-width{display:block!important;bottom:5px}
+#stockVisualControls input[type=number]{display:block;width:100%;padding:5px 8px;margin-top:4px;font-size:14px}
+#stockVisualControls input[type=checkbox]{width:18px;height:18px;margin:0 0 0 8px;display:inline-block;vertical-align:middle}
+#stockVisualControls output{font-size:11px}.stock-visual-pilot:has(.stock-actions[open]){z-index:100!important}
+#main .stock-visual-pilot .stock-pilot-brand{font-size:max(14px,calc(var(--stock-fontSize,15)*.92px))!important;font-style:italic;font-weight:400}
+#main .stock-visual-pilot .free-stock-table [data-free-name]{font-weight:500}
+#main .stock-visual-pilot .free-stock-head,#main .stock-visual-pilot .free-stock-table th{border-color:var(--stock-borderColor,#b38b66)}
+#stockVisualControls .stock-style-group{min-width:0;margin:12px 0;padding:4px 10px 8px;border:1px solid #b38b6655;border-radius:8px}
+#stockVisualControls legend{font-size:13px;font-weight:600;padding:0 5px;color:#61442e}

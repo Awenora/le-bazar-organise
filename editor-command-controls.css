@@ -1,0 +1,20 @@
+/* Seulement les commandes répertoriées ; aucune règle sur les produits ou repas. */
+[data-command-control]{min-width:32px!important;min-height:32px;box-sizing:border-box;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;flex-shrink:1!important}
+button[data-command-control]{height:auto;line-height:1.25!important;overflow:visible!important}
+.courses-arrow-nav[data-command-control]{flex-wrap:wrap!important;white-space:normal!important}
+.courses-arrow-nav[data-command-control]>span{min-width:0;overflow-wrap:anywhere;white-space:normal}
+[data-command-control] :is(input,select){min-width:0!important;box-sizing:border-box}
+.visual-editing [data-command-control]{cursor:move;touch-action:none;outline:1px dashed #805230;position:relative}
+.visual-editing [data-command-control][data-visual-selected]{outline:2px solid #805230!important;z-index:25}
+#side .side-notebook-label{display:inline-flex!important;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:7px 0!important;min-width:32px!important;flex-wrap:wrap;align-self:flex-start}
+#side .side-notebook-label select{width:130px!important;max-width:100%;flex:1 1 80px;min-width:0!important;margin:0!important}
+#side .notebook-control-caption{font-size:13px;flex:0 0 auto}
+#visualEditorPanel{box-sizing:border-box;resize:both;min-width:220px;min-height:100px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+#visualEditorPanel .visual-editor-actions{position:sticky;bottom:-15px;z-index:6;background:#fff4e8;padding-block:8px}
+#visualEditorPanel.editor-collapsed{height:auto!important;min-height:0;resize:none;width:240px!important;padding-block:5px!important}
+#visualEditorPanel.editor-collapsed>.visual-editor-actions{display:none!important}
+#visualEditorPanel.editor-collapsed .visual-window-head{padding:0;top:0}
+#visualEditorPanel.editor-collapsed .visual-window-head h2{font-size:14px!important}
+.editor-window-size{display:flex;gap:8px;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid #b38b6655}
+.editor-window-size label{font-size:12px;flex:1;min-width:75px}.editor-window-size input{width:100%;min-width:0;box-sizing:border-box}
+@media(max-width:700px){#visualEditorPanel{min-width:220px}.courses-list-toolbar [data-command-control]{max-width:100%}.courses-store-filter select{max-width:100%}}

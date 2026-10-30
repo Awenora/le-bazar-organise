@@ -1,0 +1,6 @@
+/* Paysage attaché à la page ; aucun recadrage lors du changement de rubrique. */
+body.seasonal-site{background-attachment:fixed!important;background-repeat:no-repeat!important}
+.seasonal-site #main>section.panel:has(#catalog),.seasonal-site #main>section.panel:has(.shop-columns),.seasonal-site .open-notebook{background:transparent!important;border-color:transparent;box-shadow:none}
+.seasonal-site #main>.intro{background:transparent!important}
+.seasonal-site #main>.intro h2,.seasonal-site #main>section.panel>.catalog-heading h2,.seasonal-site #main>section.panel>.toolbar>h2,.seasonal-site .open-notebook>.catalog-heading h2{background:#fff3dfbb;border-radius:6px;padding:4px 9px;width:max-content;max-width:100%}
+.seasonal-site .shop-store,.seasonal-site .card,.seasonal-site .notebook-cover{background-color:rgba(255,247,233,.72)}
