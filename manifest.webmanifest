@@ -1,0 +1,25 @@
+{
+  "name": "Le Bazar Organisé",
+  "short_name": "Le Bazar",
+  "description": "Le Bazar Organisé — site familial",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4eddb",
+  "theme_color": "#f4eddb",
+  "icons": [
+    {
+      "src": "icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
