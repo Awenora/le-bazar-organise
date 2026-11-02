@@ -29,9 +29,9 @@ export class PrivateMedia {
     return this.inflight.get(item.sha256);
   }
   start(){
-    const apply=node=>{
+    const apply=(node,deep=true)=>{
       if(node.nodeType!==1)return;
-      const items=[node,...node.querySelectorAll('img,[style]')];
+      const items=deep?[node,...node.querySelectorAll('img,[style]')]:[node];
       for(const el of items){
         const src=el.getAttribute('src');
         if(src&&this.sources.has(src)){this.url(src).then(url=>{if(el.getAttribute('src')===src)el.setAttribute('src',url);}).catch(()=>{});}
@@ -41,7 +41,7 @@ export class PrivateMedia {
         }).catch(()=>{});
       }
     };
-    this.scan=apply;apply(document.body);this.observer=new MutationObserver(records=>{for(const r of records){if(r.type==='attributes')apply(r.target);else for(const node of r.addedNodes)apply(node);}});
+    this.scan=apply;apply(document.body);this.observer=new MutationObserver(records=>{for(const r of records){if(r.type==='attributes')apply(r.target,false);else for(const node of r.addedNodes)apply(node);}});
     this.observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','style']});
   }
 }

@@ -1,11 +1,17 @@
 import {config} from './config.mjs';
 import {CloudEngine} from './engine.mjs';
-import {createBackend} from './backend.mjs';
-import {PrivateMedia} from './media.mjs';
+import {createBackend} from './backend.mjs?v=loading-20261102-1';
+import {PrivateMedia} from './media.mjs?v=loading-20261102-1';
 import {encodeCache,decodeCache} from './cache-codec.mjs';
 import {applyPublicationVisuals} from './publication-visuals.mjs';
 import {applyAllMonthVisuals} from './publication-seasonal-visuals.mjs';
 import {importRecipeByLink,fetchImportedImage} from './recipe-import-client.mjs?v=edge-import-20261030-2';
+// Fetch classic scripts together, but retain their original execution order below.
+// Preloads contain only public code; no family record is requested before login.
+for(const paused of document.querySelectorAll('script[data-cloud-src]')){
+  const preload=document.createElement('link');preload.rel='preload';preload.as='script';
+  preload.href=paused.dataset.cloudSrc;document.head.append(preload);
+}
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
 const isCache=k=>k.startsWith('bazar-cloud-cache:');
 const store={getItem:k=>{const raw=native.get.call(localStorage,k);return isCache(k)?decodeCache(raw):raw;},setItem:(k,v)=>native.set.call(localStorage,k,isCache(k)?encodeCache(v):v)};
@@ -76,6 +82,7 @@ try{
   const engine=new CloudEngine({storage:store,storageKey,remote:backend,notify:()=>{
     if(loaded&&!applyScheduled){applyScheduled=true;queueMicrotask(()=>{applyScheduled=false;window.BazarCloud.tryApply?.();});}
   }});
+  if(engine.state?.rows?.length)backend.seed?.(engine.state.rows);
   let rows;try{rows=await backend.read();}catch(e){if(!engine.state)throw e;}
   if(rows&&!rows.some(r=>!r.deleted&&r.path.length===1&&r.path[0]==='recipes'))
     throw Error('Ce compte ne contient pas la bibliothèque familiale. Le compte de test doit être utilisé uniquement dans la page d’essais séparée.');
@@ -154,12 +161,13 @@ try{
   };
   const media=new PrivateMedia(backend,()=>engine.view(),store,'bazar-cloud-media-map:'+household.id);bridge.media=media;
   try{await media.initialize();}catch(e){bridge.lastError=e.message;}
+  media.start();
   window.BAZAR_HAD_LOCAL_DATA=true;
   for(const paused of document.querySelectorAll('script[data-cloud-src]')){
     const script=document.createElement('script');script.src=paused.dataset.cloudSrc;
     await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=()=>reject(Error('Impossible de charger '+script.src));document.body.append(script);});
   }
-  loaded=true;media.start();
+  loaded=true;
   addEventListener('online',()=>bridge.sync());
   addEventListener('focus',()=>bridge.sync());
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)bridge.sync();});

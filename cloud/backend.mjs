@@ -3,8 +3,13 @@ export function createBackend(client,household,{writes=false}={}){
   const table=name=>client.schema('bazar').from(name);
   async function query(value){const {data,error}=await value;if(error)throw Error(error.message||'Accès familial indisponible.');return data;}
   async function head(){const r=await query(table('family_records').select('revision').eq('household_id',household).order('revision',{ascending:false}).limit(1));return Number(r[0]?.revision||0);}
-  async function all(name,columns,order){let out=[];for(let start=0;;){const page=await query(table(name).select(columns).eq('household_id',household).order(order).range(start,start+199));if(!page.length)return out;out.push(...page);start+=page.length;}}
+  async function all(name,columns,order){let out=[];for(let start=0;;){const page=await query(table(name).select(columns).eq('household_id',household).order(order).range(start,start+999));if(!page.length)return out;out.push(...page);start+=page.length;}}
   return {
+    seed(rows){
+      // Seed only the last confirmed server rows, never queued local changes.
+      if(cachedRows||!Array.isArray(rows)||!rows.length||rows.some(r=>!Array.isArray(r.path)||!Number.isFinite(Number(r.revision))))return;
+      cachedRows=structuredClone(rows);cachedRevision=rows.reduce((n,r)=>Math.max(n,Number(r.revision)),0);
+    },
     async read(){
       const current=await head();if(cachedRows&&current===cachedRevision)return structuredClone(cachedRows);
       if(cachedRows&&current>cachedRevision){
@@ -23,7 +28,7 @@ export function createBackend(client,household,{writes=false}={}){
       }
       // A first load or unavailable journal needs a stable complete snapshot.
       for(let n=0;n<4;n++){
-        const before=await head(),rows=await all('family_records','path,payload,revision,deleted','path'),after=await head();
+        const before=n===0?current:await head(),rows=await all('family_records','path,payload,revision,deleted','path'),after=await head();
         if(before===after){cachedRows=rows;cachedRevision=after;return structuredClone(rows);}
       }
       throw Error('Des modifications arrivent : lecture différée, cache local conservé.');
