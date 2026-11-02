@@ -3,7 +3,14 @@
   const cloud=window.BazarCloud;
   cloud.currentPage=()=>page;
   function same(a,b){return JSON.stringify(a)===JSON.stringify(b);}
-  function busy(){return document.querySelector('#dialog')?.open||
+  let menuRefreshDeferred=false;
+  function recipeMenuOpen(){
+    const targeted=page==='Carnets'||page==='Recettes'||(page==='À table !'&&tab==='Recettes');
+    return targeted&&document.querySelector('#sideNotebookMenu,.bazar-action-menu');
+  }
+  function busy(){
+    const menu=recipeMenuOpen();if(menu)menuRefreshDeferred=true;
+    return menu||document.querySelector('#dialog')?.open||
     (typeof visualEditSession!=='undefined'&&visualEditSession)||
     document.activeElement?.matches('input,textarea,select,[contenteditable=true]');}
   function exportLocal(){
@@ -70,5 +77,12 @@
   };
   document.addEventListener('close',()=>setTimeout(()=>cloud.tryApply(),0),true);
   document.addEventListener('focusout',()=>setTimeout(()=>cloud.tryApply(),0),true);
+  // Apply queued display updates only after selection, outside click or Escape.
+  // The existing menus still own opening, closing and their business actions.
+  for(const event of ['click','keydown'])document.addEventListener(event,()=>{
+    if(menuRefreshDeferred)setTimeout(()=>{
+      if(!recipeMenuOpen()){menuRefreshDeferred=false;cloud.tryApply();}
+    },0);
+  });
   cloud.tryApply();
 })();
