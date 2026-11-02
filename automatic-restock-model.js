@@ -1,12 +1,13 @@
 /* Explicit opt-in only. No conversion, catalogue migration or changes to recipe needs. */
 (function(root){'use strict';
-function norm(u){return String(u||'').trim().toLocaleLowerCase('fr').replace(/s$/,'').replace(/^(pièce|unité)$/,'article');}
+function norm(u){return String(u||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/s$/,'').replace(/^(piece|unite)$/,'article');}
+function unitOf(row){return root.BazarPurchaseStock?.unitOf(row)||row.unit||'';}
 function inspect(data,p){
  const resolver=root.BazarFamilyShopping,rows=(data.inventory?.items||[]).filter(i=>resolver?resolver.productFor(data,i)?.id===p.id:i.catalogId===p.id);
  if(!rows.length)return {quantity:null,reason:'Aucune ligne de Stock reliée sans ambiguïté à ce produit.'};
  if(rows.some(i=>!Number.isFinite(i.quantity)||i.quantity<0))return {quantity:null,reason:'Quantité en Stock inconnue : aucun déclenchement automatique.'};
- const units=new Set(rows.map(i=>norm(i.unit))),unit=p.restock.unit||rows[0].unit||'';
- if(units.size!==1||!units.has(norm(unit)))return {quantity:null,reason:'Unités incompatibles : Stock ('+[...new Set(rows.map(i=>i.unit||'non renseignée'))].join(', ')+') / Restock ('+(unit||'non renseignée')+'). Aucune conversion automatique.',incompatible:true};
+ const units=new Set(rows.map(i=>norm(unitOf(i)))),unit=p.restock.unit||unitOf(rows[0]);
+ if(units.size!==1||!units.has(norm(unit)))return {quantity:null,reason:'Unités incompatibles : Stock ('+[...new Set(rows.map(i=>unitOf(i)||'non renseignée'))].join(', ')+') / Restock ('+(unit||'non renseignée')+'). Aucune conversion automatique.',incompatible:true};
  return {quantity:rows.reduce((n,i)=>n+i.quantity,0),unit};
 }
 function stock(data,p){return inspect(data,p).quantity;}
@@ -21,16 +22,16 @@ function reconcile(data,wk,api){let changed=false;
  }}
  const checked=inspect(data,p),n=checked.quantity;if(n===null){api.issue?.(p,checked);continue;}const route=destination(data,p),unit=checked.unit;
  if(n>c.threshold){if(previous&&!previous.armed){previous.armed=true;changed=true;}continue;}
- if(previous&&!previous.armed)continue;
- // A pending purchase in any week is reused; never duplicate an explicit purchase.
+ if(previous&&!previous.armed&&!previous.adopted)continue;
+ // Only an automatic order can satisfy this circuit. A recipe purchase is separate.
  const weeks=new Set([wk,...(data.manualShopping||[]).map(i=>i.shoppingWeek).filter(Boolean)]);let existing;
- for(const w of weeks){existing=api.items(w).find(i=>api.product(i)?.id===p.id&&!closed(data,w,i));if(existing){existing={item:existing,week:w};break;}}
+ for(const w of weeks){const item=api.items(w).find(i=>i.automaticRestock?.catalogId===p.id&&!closed(data,w,i));if(item){existing={item,week:w};break;}}
  data.automaticRestock??={};const cycle=(previous?.cycle||0)+1;
- if(existing){const item=existing.item;data.automaticRestock[p.id]={cycle,armed:false,week:existing.week,key:item.key,identity:item.identity,adopted:true};if(!item.adjustment&&!item.buyManual)api.quantity(existing.week,item,c.quantity,unit);changed=true;continue;}
+ if(existing){if(!existing.item.adjustment&&!existing.item.buyManual)api.quantity(existing.week,existing.item,c.quantity,unit);data.automaticRestock[p.id]={cycle:existing.item.automaticRestock.cycle,armed:false,week:existing.week,key:existing.item.key,identity:existing.item.identity,adopted:false};changed=true;continue;}
  const key='automatic-restock:'+p.id+':'+cycle;
  data.manualShopping??=[];if(!data.manualShopping.some(i=>i.key===key))data.manualShopping.push({key,text:p.name,catalogId:p.id,shoppingWeek:wk,automaticRestock:{catalogId:p.id,cycle}});
  data.shops??={};data.shops[key]=route.store;data.productFamilies??={};data.productFamilies[key]=route.family||'Sans catégorie';
- const item=api.items(wk).find(i=>(i.sourceKeys||[i.key]).includes(key));if(!item)throw Error('Impossible de préparer le réapprovisionnement : '+p.name);
+ const item=api.items(wk).find(i=>(i.sourceKeys||[i.key]).includes(key));if(!item){api.issue?.(p,{blocked:true,reason:'Achat Restock en attente d’affichage ; les autres modifications restent enregistrables.'});continue;}
  api.quantity(wk,item,c.quantity,unit);data.automaticRestock[p.id]={cycle,armed:false,week:wk,key,identity:item.identity,adopted:false};changed=true;
  }
  return changed;
