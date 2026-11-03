@@ -2,7 +2,7 @@
 (function(){'use strict';
  const productOf=item=>familyShop.productFor(data,item,stockTools);
  const isAuto=item=>!!item.automaticRestock;
- function habitualStore(item){const p=productOf(item);return p?(familyShop.routeFor(data,{catalogId:p.id},stockTools).store||p.store||'À affecter'):'À affecter';}
+ function habitualStore(item){const weekly=window.BazarSimpleCourses?.destination(item);if(weekly)return weekly;const p=productOf(item);return p?(familyShop.routeFor(data,{catalogId:p.id},stockTools).store||p.store||'À affecter'):'À affecter';}
  function savedIdentity(item){if(!isAuto(item)||item.identity)return null;const first='manual:'+item.key,wk=datekey(page==='Courses'?coursesWeek():week);const valid=id=>{try{const v=JSON.parse(id);return v.length===3&&v[0]===first?v:null;}catch{return null;}};
   const ids=[...new Set(['shoppingQuantities','shoppingCaddie','shoppingExcluded'].flatMap(field=>Object.keys(data[field]?.[wk]||{})).filter(id=>valid(id)))];
   if(ids.length===1)return valid(ids[0]);if(ids.length>1)return null;

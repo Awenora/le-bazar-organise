@@ -11,7 +11,7 @@ function courseExcludedDialog(){
 }
 shopping=function(){
  syncShoppingOptions();const wk=datekey(coursesWeek()),items=shoppingItems(),state=courseList.weekState(data,wk),counts=courseList.counts(items,state),view=data.shoppingListView||{};
- const store=view.store&&shoppingStores.includes(view.store)?view.store:'all';
+ const store='all'; // The three visible tables replace the obsolete store filter.
  const listed=items.filter(i=>!state.excluded[i.identity]&&(store==='all'||storeOf(i)===store)&&(!state.checked[i.identity]));
  const groups=[];for(const shop of [...new Set([...shoppingStores,...listed.map(storeOf)])]){const selected=listed.filter(i=>storeOf(i)===shop);for(const family of shoppingGroupNames(shop,selected)){const rows=selected.filter(i=>familyOf(i)===family);if(rows.length)groups.push({shop,family,rows});}}
  const excludedCount=Object.keys(state.excluded).length;

@@ -1,0 +1,12 @@
+.course-free-board .course-simple-line,.course-free-board .course-simple-columns{grid-template-columns:var(--course-checkbox,30px) var(--course-quantity,40px) var(--course-product-track,minmax(0,1fr)) calc(var(--course-stock-width,36px) + var(--course-menu-width,26px)) minmax(45px,var(--course-formatWidth,76px))!important}
+.course-free-board .course-simple-line>.course-simple-actions{grid-column:4!important;display:flex;align-items:center;justify-content:center;gap:2px}
+.course-simple-actions>.course-inline-stock{width:var(--course-stock-width,36px)!important;min-width:24px;min-height:25px;padding:2px 3px;font-size:11px;line-height:1.2;border-radius:4px;color:#392b20;background:#fff3df9c}
+.course-simple-actions>.course-simple-remove{display:inline-flex;align-items:center;justify-content:center;width:var(--course-menu-width,26px);min-width:20px;padding:2px!important;border:0;background:transparent;color:inherit;font:inherit;font-size:18px;line-height:1}
+.course-free-board .course-simple-line>.course-product-format{grid-column:5!important}
+.course-simple-issue{display:block;white-space:normal;font-size:.8em;line-height:1.3;font-weight:400;margin-top:3px}
+.course-simple-destination{display:none;font:inherit;font-size:.8em;color:inherit;max-width:100%;margin-top:3px}
+.course-product-name[draggable=true]{cursor:grab}
+.course-simple-drop{outline:2px solid #805230;outline-offset:-2px}
+@media(max-width:850px),(pointer:coarse){.course-simple-destination{display:block}}
+
+.course-simple-legacy[hidden]{display:none!important}

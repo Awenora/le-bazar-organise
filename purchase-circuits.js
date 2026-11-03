@@ -11,7 +11,6 @@
  const setQuantity=courseList.setQuantity;courseList.setQuantity=function(d,w,item,value,tools,unit){const user=userQuantity(item);const result=setQuantity(d,w,item,value,tools,unit);if(user)d.shoppingQuantities[w][item.identity].stockPurchaseOverride=true;return result;};
  const setBuy=habitualTools.setBuy;habitualTools.setBuy=function(d,w,item,value,tools,unit){const user=userQuantity(item);const result=setBuy(d,w,item,value,tools,unit);if(user)d.shoppingBuyQuantities[w][item.buyKey].stockPurchaseOverride=true;return result;};
  const beforeShopping=shopping;shopping=function(){beforeShopping();const bar=document.querySelector('.courses-list-toolbar');if(!bar)return;
- const items=shoppingItems(),errors=[...new Set(items.map(i=>i.stockIssue).filter(Boolean))],error=document.querySelector('.courses-list-error');if(error&&errors.length&&!error.textContent){error.textContent=errors.length===1?errors[0]:errors.length+' produits : quantité ou unité à préciser pour comparer avec le Stock. Le détail est indiqué au survol de leur quantité.';error.hidden=false;}
- document.querySelectorAll('[data-course-index]').forEach(row=>{const item=items[Number(row.dataset.courseIndex)];if(item?.stockIssue){const input=row.querySelector('[data-list-quantity]');if(input)input.title=item.stockIssue;}});
+
  };
 })();
