@@ -17,6 +17,20 @@
     const blob=new Blob([JSON.stringify(cloud.engine.view(),null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='bazar-version-locale-conflit.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
+  let scrollGeneration=0,scrollInteraction=0;
+  for(const event of ['wheel','touchstart','pointerdown','keydown'])document.addEventListener(event,()=>{scrollInteraction++;},{capture:true,passive:true});
+  function rememberScroll(el){
+    const top=el.scrollTop,left=el.scrollLeft;
+    if(el===document.scrollingElement)return {find:()=>document.scrollingElement,top,left};
+    if(el.id)return {find:()=>document.getElementById(el.id),top,left};
+    if(el.matches('#side .cards'))return {find:()=>document.querySelector('#side .cards'),top,left};
+    // Relative child paths belong to a stable ancestor, never the first matching class.
+    const anchor=el.parentElement?.closest('[id]');if(!anchor)return null;
+    const path=[];for(let node=el;node!==anchor;node=node.parentElement){path.unshift([...node.parentElement.children].indexOf(node));}
+    const id=anchor.id,tag=el.tagName;
+    return {find:()=>{let node=document.getElementById(id);for(const i of path)node=node?.children[i];return node?.tagName===tag?node:null;},top,left};
+  }
+  function restoreScroll(scroll){for(const state of scroll){const node=state.find();if(node){node.scrollTop=state.top;node.scrollLeft=state.left;}}}
   cloud.tryApply=()=>{
     if(busy())return;
     if(cloud.authRequired&&navigator.onLine&&!cloud.reconnecting){
@@ -32,11 +46,15 @@
       $('#cloudLater').onclick=()=>{cloud.conflictMuted=true;$('#dialog').close();};return;
     }
     const next=cloud.engine.view();if(same(data,next))return;
-    const scroll=[...document.querySelectorAll('*')].filter(el=>el.scrollTop||el.scrollLeft).map(el=>[el.id,el.className,el.scrollTop,el.scrollLeft]);
+    const scroll=[...document.querySelectorAll('*')].filter(el=>el.scrollTop||el.scrollLeft).map(rememberScroll).filter(Boolean),generation=++scrollGeneration,interaction=scrollInteraction,viewPage=page,viewTab=tab;
     cloud.patch(data,next);cloud.applied(data);
     if(typeof budgetEmpty!=='undefined')budgetEmpty=null;
     render();
-    for(const [id,cls,top,left]of scroll){const node=id?document.getElementById(id):[...document.querySelectorAll('*')].find(el=>el.className===cls);if(node){node.scrollTop=top;node.scrollLeft=left;}}
+    restoreScroll(scroll);
+    // Recipe-grid sizing finishes on animation frames. Restore once it has settled,
+    // but never pull back a user who has started scrolling or changed page meanwhile.
+    const settled=()=>{if(generation===scrollGeneration&&interaction===scrollInteraction&&page===viewPage&&tab===viewTab)restoreScroll(scroll);};
+    requestAnimationFrame(()=>{settled();requestAnimationFrame(settled);});
   };
   // Whole-database replacement breaks library revision protection even when
   // requested through an old import handler; preserve the file and refuse it.
