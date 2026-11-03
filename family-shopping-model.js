@@ -39,14 +39,17 @@ function productFor(d,item,tools=root.BazarStockTools){
 function routeFor(d,item,tools=root.BazarStockTools,legacyKey=root.shoppingProduct){
  const product=productFor(d,item,tools),keys=[item.key,item.baseKey,...(item.sourceKeys||[]),...(item.baseKeys||[])].filter(Boolean);
  const texts=[...(item.uses||[]).map(u=>u.originalText||u.text),...(item.texts||[]),item.text,item.name,...(product?[product.name,...String(product.aliases||'').split(',')]:[])].filter(Boolean),routes=d.shoppingRouting?.products||{};
- const learned=texts.flatMap(t=>{const n=tools?.parseIngredient?tools.parseIngredient(t).normalized:norm(t);return [routes['ingredient:'+n],legacyKey?routes[legacyKey(t)]:undefined];}).filter(Boolean);
+ const learned=()=>texts.flatMap(t=>{const n=tools?.parseIngredient?tools.parseIngredient(t).normalized:norm(t);return [routes['ingredient:'+n],legacyKey?routes[legacyKey(t)]:undefined];}).filter(Boolean);
  const habit=product?d.shoppingProductRoutes?.['catalog:'+product.id]:null,targetRoute=d.shoppingProductRoutes?.[item.replacementTarget],catalogKey=product?'family-catalog:'+product.id:null;
  const valid=v=>v&&v!=='À affecter'&&v!=='Sans catégorie';
  const unanimous=list=>{const values=[...new Set(list.filter(valid))];return values.length===1?values[0]:undefined;};
  const pick=values=>values.find(valid);
- const store=pick([d.shops?.[item.key],item.routingStore,item.replacementStore,item.purchaseStore,item.orphan?item.store:undefined,unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,product?.store,d.shops?.[catalogKey],unanimous(learned.map(r=>r.store))]);
- const family=pick([d.productFamilies?.[item.key],item.replacementFamily,item.purchaseFamily,item.orphan?item.family:undefined,unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,product?.family,d.productFamilies?.[catalogKey],unanimous(learned.map(r=>r.family))]);
- return {store,family};
+ const store=pick([d.shops?.[item.key],item.routingStore,item.replacementStore,item.purchaseStore,item.orphan?item.store:undefined,unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,product?.store,d.shops?.[catalogKey]]);
+ const learnedRoutes=store?null:learned();
+ const resolvedStore=store||unanimous(learnedRoutes.map(r=>r.store));
+ const family=pick([d.productFamilies?.[item.key],item.replacementFamily,item.purchaseFamily,item.orphan?item.family:undefined,unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,product?.family,d.productFamilies?.[catalogKey]]);
+ const resolvedFamily=family||unanimous((learnedRoutes||learned()).map(r=>r.family));
+ return {store:resolvedStore,family:resolvedFamily};
 }
 function teamFor(d,item,week){const s=ensure(d),ref=reference(item),p=productFor(d,item),override=s.overrides[week]?.[ref]??(p?s.overrides[week]?.['catalog:'+p.id]:undefined);const teamId=override?.teamId??p?.teamId??s.habits?.[ref]?.teamId??'';return s.teams.find(t=>t.id===teamId&&t.active!==false)||null;}
 function transfer(d,item,week,teamId){const s=ensure(d),team=s.teams.find(t=>t.id===teamId&&t.active!==false);if(teamId&&!team)throw Error('Équipe introuvable.');s.overrides[week]??={};s.overrides[week][reference(item)]={teamId:team?.id||'',store:team?.store||''};}
