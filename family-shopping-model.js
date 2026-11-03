@@ -9,14 +9,17 @@ function similarity(a,b){const row=Array.from({length:b.length+1},(_,i)=>i);for(
 function resolveFamily(d,value){const name=family(value),known=[...(d.shoppingCatalog||[]).map(p=>family(p.family)),...(d.inventory?.categories||[]).map(c=>family(c.name)),...(d.shoppingRouting?.families||[])];return known.find(v=>norm(v)===norm(name))||(name===name.toLocaleUpperCase('fr-FR')?name[0]+name.slice(1).toLocaleLowerCase('fr-FR'):name);}
 function productKeys(p){const keys=[p.name,...String(p.aliases||'').split(',')];if(p.purchaseFormat&&!norm(p.name).endsWith(norm(p.purchaseFormat)))keys.unshift(p.name+' '+p.purchaseFormat);return [...new Set(keys.map(productKey).filter(Boolean))];}
 function importCatalog(d,source){const state=ensure(d);if(state.imports[source.version])return {added:0,matched:0,alreadyImported:true};d.shoppingCatalog??=[];const byKey=new Map();for(const p of d.shoppingCatalog)for(const k of productKeys(p))if(!byKey.has(k))byKey.set(k,p);let added=0,matched=0,pending=0;state.importReview??=[];for(const row of source.products){const key=productKey(row.name);let p=byKey.get(key);if(p){matched++;p.importSources??=[];if(!p.importSources.includes(source.version))p.importSources.push(source.version);}else{const candidates=d.shoppingCatalog.map(p=>({id:p.id,score:similarity(productKey(p.name),key)})).filter(v=>v.score>=.78).sort((a,b)=>b.score-a.score).slice(0,3);if(candidates.length){state.importReview.push({id:id('review'),...row,candidates:candidates.map(v=>v.id)});pending++;continue;}p={id:id('catalog'),name:row.name.trim(),family:resolveFamily(d,row.family),store:'',aliases:'',notes:'',historicalStore:row.historicalStore||'',storeConfirmed:false,importSources:[source.version]};d.shoppingCatalog.push(p);for(const k of productKeys(p))byKey.set(k,p);added++;}}renameFamilies(d);state.imports[source.version]={added,matched,pending,at:new Date().toISOString()};return {added,matched,pending};}
+// Exact preparation wording only; no fuzzy similarity or ingredient conversion.
+function preparedName(value){const name=norm(value),front=name.match(/^(emince|hache|rape|tranche)(?:e|es|s)?\s+(?:de\s+|d')?(.+)$/),back=name.match(/^(.+?)\s+(emince|hache|rape|tranche)(?:e|es|s)?$/);return front?front[1]+'|'+productKey(front[2]):back?back[2]+'|'+productKey(back[1]):null;}
+function cataloguePreparedName(p){let name=norm(p.name),format=norm(p.purchaseFormat);if(/^\d+(?:[.,]\d+)?\s*(?:g|kg|ml|cl|l)$/.test(format)){const pattern=format.replace(/\s/g,'').split('').map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s*');name=name.replace(new RegExp('[\\s\\-–—(]*'+pattern+'\\s*\\)?$'),'').trim();}return preparedName(name);}
 function reference(item){return item.replacementTarget||(item.habitualProduct?'catalog:'+item.habitualProduct.id:item.catalogId?'catalog:'+item.catalogId:item.baseKey||item.key);}
 /* Indexes live only inside an explicitly bounded, synchronous read phase. */
 let productReadScope=null;
 function withProductReadCache(fn){if(productReadScope)return fn();productReadScope=new WeakMap();try{return fn();}finally{productReadScope=null;}}
 function invalidateProductReadCache(){if(productReadScope)productReadScope=new WeakMap();}
-function productReadIndex(d){if(!productReadScope)return null;let index=productReadScope.get(d);if(index)return index;index={ids:new Map(),exact:new Map(),linked:new Map()};
+function productReadIndex(d){if(!productReadScope)return null;let index=productReadScope.get(d);if(index)return index;index={ids:new Map(),exact:new Map(),linked:new Map(),prepared:new Map()};
  const add=(map,key,p)=>{if(!map.has(key))map.set(key,new Set());map.get(key).add(p);};
- for(const p of d.shoppingCatalog||[]){if(!index.ids.has(p.id))index.ids.set(p.id,p);for(const key of productKeys(p))add(index.exact,key,p);for(const name of p.ingredientLinks||[])add(index.linked,name,p);}
+ for(const p of d.shoppingCatalog||[]){if(!index.ids.has(p.id))index.ids.set(p.id,p);for(const key of productKeys(p))add(index.exact,key,p);const prepared=cataloguePreparedName(p);if(prepared)add(index.prepared,prepared,p);for(const name of p.ingredientLinks||[])add(index.linked,name,p);}
  productReadScope.set(d,index);return index;
 }
 function indexMatches(map,keys){const found=new Set();for(const key of keys)for(const p of map.get(key)||[])found.add(p);return [...found];}
@@ -34,7 +37,10 @@ function productFor(d,item,tools=root.BazarStockTools){
  if(assigned.length){const targets=[...new Set(assigned.map(n=>d.shoppingIngredientProducts[n]))];return targets.length===1&&targets[0]?findId(targets[0])||null:null;}
  const linked=index?indexMatches(index.linked,names):catalogue.filter(p=>(p.ingredientLinks||[]).some(n=>names.includes(n)));if(linked.length)return linked.length===1?linked[0]:null;
  const exact=[item.name,item.text,...names].filter(Boolean).map(productKey),matches=index?indexMatches(index.exact,exact):catalogue.filter(p=>productKeys(p).some(k=>exact.includes(k)));
- return matches.length===1?matches[0]:null;
+ if(matches.length)return matches.length===1?matches[0]:null;
+ const preparation=[...new Set([item.name,item.text,...names].filter(Boolean).map(preparedName).filter(Boolean))];
+ const candidates=preparation.length?(index?indexMatches(index.prepared,preparation):catalogue.filter(p=>preparation.includes(cataloguePreparedName(p)))):[];
+ return candidates.length===1?candidates[0]:null;
 }
 function routeFor(d,item,tools=root.BazarStockTools,legacyKey=root.shoppingProduct){
  const product=productFor(d,item,tools),keys=[item.key,item.baseKey,...(item.sourceKeys||[]),...(item.baseKeys||[])].filter(Boolean);

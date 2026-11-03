@@ -21,8 +21,29 @@
   courseLastExcluded=null;shopping();
  }
  let dragged=null;
+ function closeDestination(){document.getElementById('courseDestinationChoice')?.remove();}
+ function chooseDestination(button,item){
+  const old=document.getElementById('courseDestinationChoice');closeDestination();if(old?.dataset.identity===item.identity)return;
+  const menu=document.createElement('div');menu.id='courseDestinationChoice';menu.dataset.identity=item.identity;menu.setAttribute('role','menu');menu.setAttribute('aria-label','Déplacer cet achat pour cette semaine');
+  for(const store of ['Lidl','Intermarché','Autres']){const option=document.createElement('button');option.type='button';option.setAttribute('role','menuitem');option.textContent=store;option.onclick=()=>{if(move(item,store))closeDestination();};menu.append(option);}
+  document.body.append(menu);const rect=button.getBoundingClientRect();menu.style.left=Math.max(6,Math.min(rect.right-menu.offsetWidth,innerWidth-menu.offsetWidth-6))+'px';menu.style.top=Math.max(6,rect.bottom+menu.offsetHeight+6<=innerHeight?rect.bottom+3:rect.top-menu.offsetHeight-3)+'px';
+ }
+ document.addEventListener('click',event=>{if(!event.target.closest('#courseDestinationChoice,.course-simple-send'))closeDestination();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')closeDestination();});
+ window.addEventListener('resize',closeDestination);
+ shoppingIngredientDialog=function(store){
+  modal('<h2>Ajouter un article · '+esc(store)+'</h2><form id="shoppingIngredientForm"><label class="field">Produit<input id="shoppingIngredientText" required maxlength="200" autocomplete="off"></label><label class="field">Quantité<input id="shoppingArticleQuantity" type="number" min="0" step="any" required value="1"></label><label class="field">Format (facultatif)<input id="shoppingArticleFormat" maxlength="80" placeholder="Ex. boîte"></label><label class="field">Catégorie (facultative)<select id="shoppingIngredientFamily"><option value="">Achats ponctuels</option>'+storeCategories(store).map(f=>'<option>'+esc(f)+'</option>').join('')+'</select></label><p id="shoppingArticleError" role="alert"></p><div class="actions"><button class="primary" type="submit">Ajouter</button><button type="button" id="shoppingArticleCancel">Annuler</button></div></form>');
+  document.getElementById('shoppingArticleCancel').onclick=()=>document.getElementById('dialog').close();
+  document.getElementById('shoppingIngredientForm').onsubmit=event=>{
+   event.preventDefault();const name=document.getElementById('shoppingIngredientText').value.trim(),quantity=stockTools.amount(document.getElementById('shoppingArticleQuantity').value),format=document.getElementById('shoppingArticleFormat').value.trim(),family=document.getElementById('shoppingIngredientFamily').value||'Achats ponctuels';if(!name||quantity===null)return;
+   const fields=['manualShopping','shops','productFamilies','shoppingQuantities','shoppingLinePresentation'],before=Object.fromEntries(fields.map(k=>[k,structuredClone(data[k])])),key=familyShop.id('one-off'),wk=weekKey();
+   try{data.manualShopping??=[];data.manualShopping.push({key,text:name,shoppingWeek:wk,oneOff:true});data.shops??={};data.shops[key]=store;data.productFamilies??={};data.productFamilies[key]=family;
+    const item=shoppingItems().find(i=>(i.sourceKeys||[i.key]).includes(key));if(!item)throw Error('L’article n’a pas pu être préparé.');courseList.setQuantity(data,wk,item,quantity,stockTools,format||'article');data.shoppingLinePresentation??={};data.shoppingLinePresentation[item.identity]={format};if(!save())throw Error('Enregistrement impossible.');document.getElementById('dialog').close();shopping();
+   }catch(error){for(const field of fields){if(before[field]===undefined)delete data[field];else data[field]=before[field];}document.getElementById('shoppingArticleError').textContent=error.message;}
+  };
+ };
  function decorate(){
-  if(page!=='Courses')return;const items=shoppingItems(),wk=weekKey(),counts=courseList.counts(items,courseList.weekState(data,wk)),bar=document.querySelector('.courses-list-toolbar');if(!bar)return;
+  if(page!=='Courses')return;closeDestination();const items=shoppingItems(),wk=weekKey(),counts=courseList.counts(items,courseList.weekState(data,wk)),bar=document.querySelector('.courses-list-toolbar');if(!bar)return;
   for(const selector of ['.courses-store-filter','#coursePendingOpen','#listOrganizer','#listExcluded','.courses-add-store','#courseStoreHandles'])document.querySelectorAll(selector).forEach(el=>el.remove());
   const total=document.createElement('strong');total.id='courseTotalCount';total.className='courses-remaining';total.dataset.siteVisualKey='course:control-total';total.textContent=counts.total+' article'+(counts.total===1?'':'s')+' au total';bar.append(total);
   const keep=new Set(['courses-arrow-nav']);for(const child of [...bar.children]){if(child.id==='listHideChecked'||child.id==='listUndo'||child.id==='courseTotalCount'||child.classList.contains('courses-remaining')||[...keep].some(c=>child.classList.contains(c)))continue;child.remove();}
@@ -35,7 +56,7 @@
    if(!product)continue;
    product.querySelectorAll('.courses-shop-provenance').forEach(el=>el.remove());
    const name=product.querySelector('.course-product-name');if(name){name.draggable=!visualEditSession;name.addEventListener('dragstart',event=>{if(visualEditSession){event.preventDefault();return;}dragged={item,wk};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-bazar-purchase',item.identity);});name.addEventListener('dragend',()=>{dragged=null;document.querySelectorAll('.course-simple-drop').forEach(el=>el.classList.remove('course-simple-drop'));});}
-   const select=document.createElement('select');select.className='course-simple-destination';select.setAttribute('aria-label','Déplacer vers un magasin pour cette semaine : '+item.name);select.innerHTML='<option value="">Déplacer vers…</option>'+['Lidl','Intermarché','Autres',...(item.automaticRestock?['Carrefour']:[])].map(store=>'<option>'+esc(store)+'</option>').join('');select.onchange=()=>{if(select.value&&!move(item,select.value))select.value='';};product.append(select);
+   const send=document.createElement('button');send.type='button';send.className='course-simple-send';send.setAttribute('aria-label','Déplacer cet achat : '+item.name);send.setAttribute('aria-haspopup','menu');send.title='Déplacer pour cette semaine';send.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m21 3-6 18-4-8-8-4 18-6Z"/><path d="m11 13 10-10"/></svg>';send.onclick=()=>{if(!visualEditSession)chooseDestination(send,item);};row.querySelector('.course-simple-actions')?.insertBefore(send,row.querySelector('.course-simple-remove'));
    if(item.stockIssue){const note=document.createElement('small');note.className='course-simple-issue';note.id='course-stock-issue-'+row.dataset.courseIndex;note.textContent=item.stockIssue+' '+(/Stock inconnue|unité du Stock|Unités incompatibles|unités incompatibles/.test(item.stockIssue)?'Dans Stock, vérifie la quantité et le format du produit.':'Renseigne ici la quantité à acheter et le format ; les unités du Stock doivent correspondre.');product.append(note);row.querySelector('[data-list-quantity]')?.setAttribute('aria-describedby',note.id);}
   }
   for(const table of document.querySelectorAll('[data-course-primary]')){
@@ -54,6 +75,6 @@
   }
  }return cfg;};
  const priorShopping=shopping;shopping=function(...args){const result=priorShopping.apply(this,args);decorate();return result;};
- visualSiteRegistry.push({key:'ui:course-week-move',selector:'.course-simple-destination',label:'Courses · Déplacer un achat (téléphone)',min:70,max:300});
+ visualSiteRegistry.push({key:'ui:course-send',selector:'.course-simple-send',label:'Courses · Icône déplacer un achat',min:18,max:60});
  visualSiteRegistry.push({key:'ui:course-week-remove',selector:'.course-simple-remove',label:'Courses · Croix de retrait',min:20,max:60});
 })();

@@ -6,7 +6,7 @@
   let menuRefreshDeferred=false;
   function recipeMenuOpen(){
     const targeted=page==='Carnets'||page==='Recettes'||(page==='À table !'&&tab==='Recettes');
-    return targeted&&document.querySelector('#sideNotebookMenu,.bazar-action-menu');
+    return document.querySelector('#courseDestinationChoice')||(targeted&&document.querySelector('#sideNotebookMenu,.bazar-action-menu'));
   }
   function busy(){
     const menu=recipeMenuOpen();if(menu)menuRefreshDeferred=true;
