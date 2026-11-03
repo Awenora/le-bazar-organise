@@ -50,10 +50,12 @@ function routeFor(d,item,tools=root.BazarStockTools,legacyKey=root.shoppingProdu
  const valid=v=>v&&v!=='À affecter'&&v!=='Sans catégorie';
  const unanimous=list=>{const values=[...new Set(list.filter(valid))];return values.length===1?values[0]:undefined;};
  const pick=values=>values.find(valid);
- const store=pick([d.shops?.[item.key],item.routingStore,item.replacementStore,item.purchaseStore,item.orphan?item.store:undefined,unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,product?.store,d.shops?.[catalogKey]]);
+ // Confirmed habits affect the displayed destination, never the aggregation identity or one-off choices.
+ const confirmedHabit=item.identity&&habit?.confirmed&&!item.oneOff?habit:null;
+ const store=pick([confirmedHabit?.store,d.shops?.[item.key],item.routingStore,item.replacementStore,item.purchaseStore,item.orphan?item.store:undefined,unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,product?.store,d.shops?.[catalogKey]]);
  const learnedRoutes=store?null:learned();
  const resolvedStore=store||unanimous(learnedRoutes.map(r=>r.store));
- const family=pick([d.productFamilies?.[item.key],item.replacementFamily,item.purchaseFamily,item.orphan?item.family:undefined,unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,product?.family,d.productFamilies?.[catalogKey]]);
+ const family=pick([confirmedHabit?.family,d.productFamilies?.[item.key],item.replacementFamily,item.purchaseFamily,item.orphan?item.family:undefined,unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,product?.family,d.productFamilies?.[catalogKey]]);
  const resolvedFamily=family||unanimous((learnedRoutes||learned()).map(r=>r.family));
  return {store:resolvedStore,family:resolvedFamily};
 }
