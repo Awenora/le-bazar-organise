@@ -5,8 +5,8 @@
  window.BazarSimpleCourses={destination};
  const priorStore=storeOf,priorFamily=familyOf;
  const unresolved=item=>!item.automaticRestock&&!destination(item)&&priorStore(item)==='À affecter';
- storeOf=function(item){if(!item?.identity)return priorStore(item);if(item.automaticRestock)return priorStore(item);return destination(item)||(unresolved(item)?'Autres':priorStore(item));};
- familyOf=function(item){return item?.identity&&unresolved(item)?'Magasin à choisir':priorFamily(item);};
+ storeOf=function(item){if(!item?.identity)return priorStore(item);if(item.automaticRestock)return destination(item)||priorStore(item);return destination(item)||(unresolved(item)?'Autres':priorStore(item));};
+ familyOf=function(item){if(item?.identity&&item.automaticRestock&&destination(item)){const family=familyShop.routeFor(data,{catalogId:item.automaticRestock.catalogId},stockTools).family;return family&&family!=='Restock'?family:'Sans catégorie';}return item?.identity&&unresolved(item)?'Magasin à choisir':priorFamily(item);};
  if(!courseUndoFields.includes(field))courseUndoFields.push(field);
  coursesUndoBaseline=courseUndoState();
  function move(item,store){
