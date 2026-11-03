@@ -102,6 +102,8 @@ try{
     const preferences=engine.state.local.visualPreferences??={};
     ((preferences.stockRoomTables??={}).view??={}).locationId=savedStockLocation;
   }
+  const notebookLayoutKey='bazar-cloud-notebook-layout:'+household.id;
+  try{const saved=native.get.call(localStorage,notebookLayoutKey);if(saved){const layout=JSON.parse(saved);if(layout&&typeof layout==='object'&&!Array.isArray(layout))engine.state.local.notebookLayout=layout;}}catch{} // Keep the existing layout if this optional preference is unreadable.
   uiSnapshot=engine.view();
   const bridge=window.BazarCloud={engine,client,backend,household:household.id,patch,
     initialData:uiSnapshot,view:()=>engine.view(),uiSnapshot:()=>structuredClone(uiSnapshot),
@@ -115,6 +117,12 @@ try{
       ((preferences.stockRoomTables??={}).view??={}).locationId=locationId;
       ((uiSnapshot.visualPreferences??={}).stockRoomTables??={}).view??={};
       uiSnapshot.visualPreferences.stockRoomTables.view.locationId=locationId;
+      return true;
+    },
+    saveInitialNotebookLayout:layout=>{
+      const copy=structuredClone(layout);
+      native.set.call(localStorage,notebookLayoutKey,JSON.stringify(copy));
+      engine.state.local.notebookLayout=copy;uiSnapshot.notebookLayout=structuredClone(copy);
       return true;
     },
     status:'local',
@@ -164,7 +172,7 @@ try{
   Storage.prototype.setItem=function(k,value){
     if(this!==localStorage||!routed.has(k))return native.set.call(this,k,value);
     if(k==='bazar-organise-v1'){
-      const next=JSON.parse(value);engine.edit(uiSnapshot,next,{page:bridge.currentPage?.(),checkpoint:!!bridge.restoring});const location=next.visualPreferences?.stockRoomTables?.view?.locationId;if(typeof location==='string'&&location)native.set.call(localStorage,stockLocationKey,location);else native.remove.call(localStorage,stockLocationKey);uiSnapshot=structuredClone(next);
+      const next=JSON.parse(value);engine.edit(uiSnapshot,next,{page:bridge.currentPage?.(),checkpoint:!!bridge.restoring});const location=next.visualPreferences?.stockRoomTables?.view?.locationId;if(typeof location==='string'&&location)native.set.call(localStorage,stockLocationKey,location);else native.remove.call(localStorage,stockLocationKey);if(next.notebookLayout)native.set.call(localStorage,notebookLayoutKey,JSON.stringify(next.notebookLayout));else native.remove.call(localStorage,notebookLayoutKey);uiSnapshot=structuredClone(next);
       if(loaded)queueMicrotask(()=>bridge.sync());return;
     }
     return native.set.call(this,namespace(k),value);
