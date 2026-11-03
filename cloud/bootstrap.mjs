@@ -96,10 +96,27 @@ try{
   }
   applyPublicationVisuals(engine);
   applyAllMonthVisuals(engine);
+  const stockLocationKey='bazar-cloud-stock-location:'+household.id;
+  const savedStockLocation=native.get.call(localStorage,stockLocationKey);
+  if(savedStockLocation){
+    const preferences=engine.state.local.visualPreferences??={};
+    ((preferences.stockRoomTables??={}).view??={}).locationId=savedStockLocation;
+  }
   uiSnapshot=engine.view();
   const bridge=window.BazarCloud={engine,client,backend,household:household.id,patch,
     initialData:uiSnapshot,view:()=>engine.view(),uiSnapshot:()=>structuredClone(uiSnapshot),
     applied:value=>{uiSnapshot=structuredClone(value);},
+    // A Stock location is a device preference, not a household data edit.
+    saveStockLocation:locationId=>{
+      if(typeof locationId!=='string'||!locationId)throw Error('Lieu du Stock invalide.');
+      // Persist only this tiny device preference; never serialize the household here.
+      native.set.call(localStorage,stockLocationKey,locationId);
+      const preferences=engine.state.local.visualPreferences??={};
+      ((preferences.stockRoomTables??={}).view??={}).locationId=locationId;
+      ((uiSnapshot.visualPreferences??={}).stockRoomTables??={}).view??={};
+      uiSnapshot.visualPreferences.stockRoomTables.view.locationId=locationId;
+      return true;
+    },
     status:'local',
     reconnect:login,
     importRecipeByLink:url=>importRecipeByLink(client,url),
@@ -147,7 +164,7 @@ try{
   Storage.prototype.setItem=function(k,value){
     if(this!==localStorage||!routed.has(k))return native.set.call(this,k,value);
     if(k==='bazar-organise-v1'){
-      const next=JSON.parse(value);engine.edit(uiSnapshot,next,{page:bridge.currentPage?.(),checkpoint:!!bridge.restoring});uiSnapshot=structuredClone(next);
+      const next=JSON.parse(value);engine.edit(uiSnapshot,next,{page:bridge.currentPage?.(),checkpoint:!!bridge.restoring});const location=next.visualPreferences?.stockRoomTables?.view?.locationId;if(typeof location==='string'&&location)native.set.call(localStorage,stockLocationKey,location);else native.remove.call(localStorage,stockLocationKey);uiSnapshot=structuredClone(next);
       if(loaded)queueMicrotask(()=>bridge.sync());return;
     }
     return native.set.call(this,namespace(k),value);
