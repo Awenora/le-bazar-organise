@@ -28,3 +28,8 @@
 .courses-workspace .course-simple-line>.course-product-format{grid-row:1!important;min-width:0;max-width:100%;box-sizing:border-box}
 
 .courses-workspace .course-simple-actions>button{flex-basis:auto!important}
+
+.course-column-labels>[data-course-header]{position:relative;min-width:0}.course-header-text{display:inline-block}.visual-editing [data-course-header]{outline:1px dashed #95724e;outline-offset:-1px;cursor:pointer}.visual-editing .course-column-resize{position:absolute;right:-3px;top:0;bottom:0;width:8px;cursor:col-resize;touch-action:none;border-right:2px solid #95724e}
+
+/* Le champ Marque est retiré des lignes, sans modifier les marques enregistrées. */
+.courses-primary-table .course-product-brand{display:none!important}
