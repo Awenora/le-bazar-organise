@@ -17,7 +17,25 @@ function recipeIngredient(item,tools){
 }
 function matchingIngredientProducts(d,item,tools){
  const key=recipeIngredient(item,tools);
- return key?(d.shoppingCatalog||[]).filter(p=>[p.name,...String(p.aliases||'').split(',')].some(n=>ingredientName(n,tools)===key)):[];
+ if(!key)return [];
+ const scope=productReadIndex(d);
+ if(!scope)return (d.shoppingCatalog||[]).filter(p=>ingredientKeys(p,tools).has(key));
+ const parser=tools?.parseIngredient;
+ if(!scope.ingredients.has(parser)){
+  const byIngredient=new Map();
+  for(const product of d.shoppingCatalog||[]){
+   for(const name of ingredientKeys(product,tools)){
+    if(!byIngredient.has(name))byIngredient.set(name,[]);
+    byIngredient.get(name).push(product);
+   }
+  }
+  scope.ingredients.set(parser,byIngredient);
+ }
+ return scope.ingredients.get(parser).get(key)||[];
+}
+function ingredientKeys(product,tools){
+ return new Set([product.name,...String(product.aliases||'').split(',')]
+  .filter(Boolean).map(name=>ingredientName(name,tools)).filter(Boolean));
 }
 function hasIngredientChoice(d,item,tools){
  return !!(item.replacementTarget||item.replacementIssue||item.habitualProduct||item.catalogId||
@@ -39,7 +57,7 @@ function reference(item){return item.replacementTarget||(item.habitualProduct?'c
 let productReadScope=null;
 function withProductReadCache(fn){if(productReadScope)return fn();productReadScope=new WeakMap();try{return fn();}finally{productReadScope=null;}}
 function invalidateProductReadCache(){if(productReadScope)productReadScope=new WeakMap();}
-function productReadIndex(d){if(!productReadScope)return null;let index=productReadScope.get(d);if(index)return index;index={ids:new Map(),exact:new Map(),linked:new Map(),prepared:new Map()};
+function productReadIndex(d){if(!productReadScope)return null;let index=productReadScope.get(d);if(index)return index;index={ids:new Map(),exact:new Map(),linked:new Map(),prepared:new Map(),ingredients:new Map()};
  const add=(map,key,p)=>{if(!map.has(key))map.set(key,new Set());map.get(key).add(p);};
  for(const p of d.shoppingCatalog||[]){if(!index.ids.has(p.id))index.ids.set(p.id,p);for(const key of productKeys(p))add(index.exact,key,p);const prepared=cataloguePreparedName(p);if(prepared)add(index.prepared,prepared,p);for(const name of p.ingredientLinks||[])add(index.linked,name,p);}
  productReadScope.set(d,index);return index;
