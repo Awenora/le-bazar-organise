@@ -5,9 +5,36 @@ const groups={Viandes:['viande','viandes','boucherie'],'Fruits et légumes':['fr
 function family(v){const key=norm(v);return Object.keys(groups).find(k=>groups[k].includes(key))||String(v||'Sans catégorie').trim();}
 function families(d,store){return [...new Set([...(d.shoppingCategories?.[store]||[]),...(d.shoppingRouting?.families||[]),...(d.shoppingCatalog||[]).filter(p=>!store||p.store===store).map(p=>p.family),...Object.values(d.productFamilies||{})].filter(Boolean).map(family))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base',numeric:true}));}
 function addFamily(d,store,name){if(!String(name||'').trim())throw Error('Indique un nom de rayon.');name=family(name);if(!name||norm(name)==='sans categorie')throw Error('Indique un nom de rayon.');const existing=families(d).find(v=>norm(v)===norm(name));name=existing||name;d.shoppingCategories??={};d.shoppingCategories[store]??=[];if(!d.shoppingCategories[store].some(v=>norm(family(v))===norm(name)))d.shoppingCategories[store].push(name);return name;}
-function size(p,row){const sameContainer=!row||norm(row.unit||row.format)===norm(p?.purchaseUnit||p?.restock?.unit);const values=[row?.packSize,sameContainer?p?.purchasePack:null];const match=String(row?.format||(sameContainer?p?.purchaseFormat:'')||'').trim().match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|ml|cl|l)$/i);if(match)values.push({quantity:Number(match[1].replace(',','.')),unit:match[2]});return values.find(v=>v&&Number.isFinite(v.quantity)&&v.quantity>0&&/^(kg|g|ml|cl|l)$/i.test(v.unit));}
+// This exact catalogue reference has a confirmed 1 kg packet.
+const semolinaId='catalog-8a630efc-2575-4d0e-970d-935de798665e';
+function purchaseUnit(p){
+ return p?.purchaseUnit||(p?.id===semolinaId?'paquet':'');
+}
+function container(unit){return norm(unit).replace(/s$/,'');}
+function formatSize(format){
+ const match=String(format||'').trim().match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|ml|cl|l)$/i);
+ return match?{quantity:Number(match[1].replace(',','.')),unit:match[2]}:null;
+}
+function size(p,row){
+ const unit=purchaseUnit(p)||p?.restock?.unit;
+ const sameContainer=!row||container(row.unit||row.format)===container(unit);
+ const candidates=[row?.packSize,formatSize(row?.format)];
+ if(sameContainer){
+  candidates.push(p?.purchasePack,formatSize(p?.purchaseFormat));
+  if(p?.id===semolinaId&&container(unit)==='paquet'&&!p.purchasePack&&!p.purchaseFormat){
+   candidates.push({quantity:1,unit:'kg'});
+  }
+ }
+ return candidates.find(v=>v&&Number.isFinite(v.quantity)&&v.quantity>0&&/^(kg|g|ml|cl|l)$/i.test(v.unit));
+}
 function count(unit){return /^(paquets?|bo[iî]tes?|bouteilles?|sachets?|pots?|barquettes?|briques?|flacons?|tubes?)$/i.test(String(unit||'').trim());}
-function convert(q,from,to,p,row,tools=root.BazarStockTools){if(!Number.isFinite(q)||!from||!to)return null;const direct=tools.quantityIn({quantity:q,unit:from},to);if(direct!==null)return direct;const pack=size(p,row);if(!pack)return null;const samePack=unit=>count(unit)&&(row?norm(unit)===norm(row.unit||row.format):norm(unit)===norm(p?.purchaseUnit||p?.restock?.unit||''));
+function convert(q,from,to,p,row,tools=root.BazarStockTools){
+ if(!Number.isFinite(q)||!from||!to)return null;
+ const direct=tools.quantityIn({quantity:q,unit:from},to);
+ if(direct!==null)return direct;
+ const pack=size(p,row);
+ if(!pack)return null;
+ const samePack=unit=>count(unit)&&container(unit)===container(row?(row.unit||row.format):(purchaseUnit(p)||p?.restock?.unit));
  if(samePack(from))return tools.quantityIn({quantity:q*pack.quantity,unit:pack.unit},to);
  if(samePack(to)){const amount=tools.quantityIn({quantity:q,unit:from},pack.unit);return amount===null?null:amount/pack.quantity;}return null;}
 function classify(d,item,week,store,rayon,remember=false){if(!['Lidl','Intermarché','Autres','Carrefour'].includes(store))throw Error('Choisis un magasin.');const p=root.BazarFamilyShopping.productFor(d,item);if(remember&&!p&&!item.oneOff)throw Error('Associe d’abord cet ingrédient à un produit pour mémoriser son classement.');rayon=family(rayon||'Sans catégorie');d.shoppingWeeklyDestinations??={};d.shoppingWeeklyDestinations[week]??={};d.shoppingWeeklyDestinations[week][item.identity]={store,family:rayon};if(remember&&p&&!item.oneOff){d.shoppingProductRoutes??={};d.shoppingProductRoutes['catalog:'+p.id]={...d.shoppingProductRoutes['catalog:'+p.id],store,family:rayon,confirmed:true};}if(remember&&item.oneOff){rememberOccasional(d,item.name,store,rayon);}return {store,family:rayon};}
@@ -17,5 +44,5 @@ function coordinate(d,items,week,tools=root.BazarStockTools){const result=[...it
  const total=quantities.reduce((a,b)=>a+b,0),manual=auto.adjustment?.stockPurchaseOverride||auto.buyManual;if(manual&&base<total)continue;
  const quantity=manual?base:Math.max(base,count(unit)?Math.ceil(total-1e-8):Math.round(total*1e8)/1e8),index=result.indexOf(auto);result[index]={...auto,purchase:quantity,purchaseDisplay:{...(auto.purchaseDisplay||{}),quantity,unit},uses:[...(auto.uses||[]),...matches.flatMap(i=>i.uses||[])],coordinatedIds:matches.map(i=>i.identity),coordinatedSources:matches.map(i=>({identity:i.identity,uses:i.uses,quantity:i.purchase,unit:i.unit})),purchaseOrigins:['Restock','Recettes']};for(const match of matches)result.splice(result.indexOf(match),1);
  }return result;}
-const api={norm,family,families,addFamily,size,convert,classify,rememberOccasional,coordinate};root.BazarCoursesOrganisation=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+const api={norm,family,families,addFamily,purchaseUnit,size,convert,classify,rememberOccasional,coordinate};root.BazarCoursesOrganisation=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

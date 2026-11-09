@@ -6,14 +6,15 @@ function isRestock(item){return !!(item.automaticRestock||item.restockPresentati
 function apply(data,items,week,tools){const budgets=new Map(),byProduct=new Map();for(const row of data.inventory?.items||[]){const id=root.BazarFamilyShopping?.productFor(data,row,tools)?.id;if(id){if(!byProduct.has(id))byProduct.set(id,[]);byProduct.get(id).push(row);}}return items.flatMap(item=>{
  if(isRestock(item)||item.manual||item.orphan||!item.uses?.length)return [item];
  const p=root.BazarFamilyShopping?.productFor(data,item,tools);if(!p)return [item];
- const stocks=byProduct.get(p.id)||[];if(!stocks.length)return [item];
+ const model=root.BazarCoursesOrganisation;
+ const displayUnit=model?.purchaseUnit?.(p)||p.purchaseUnit||item.purchaseDisplay?.unit;
+ const stocks=byProduct.get(p.id)||[];if(!stocks.length&&!model?.purchaseUnit?.(p))return [item];
  const manual=item.buyManual||item.adjustment;if(manual?.stockPurchaseOverride||item.buyManual)return [item];
  const quantity=manual?.quantity??item.recipeRequired??item.required,unit=manual?.unit||item.recipeUnit||item.unit||'';
  const issue=reason=>[{...item,stockIssue:p.name+' : '+reason}];
  if(!Number.isFinite(quantity)||!unit)return issue('besoin sans quantité ou unité comparable ; préciser la quantité d’achat et son unité.');
  const stockUnits=stocks.map(unitOf);
- const model=root.BazarCoursesOrganisation;
- const converted=stocks.map((s,i)=>!Number.isFinite(s.quantity)||!stockUnits[i]?null:
+ const converted=stocks.map((s,i)=>s.quantity===0?0:!Number.isFinite(s.quantity)||!stockUnits[i]?null:
   model?model.convert(s.quantity,stockUnits[i],unit,p,s,tools):tools.quantityIn({quantity:s.quantity,unit:stockUnits[i]},unit));
  const [dimension,factor]=tools.unitInfo(unit),key=p.id+'|'+dimension;
  if(!budgets.has(key))budgets.set(key,converted.reduce((a,b)=>a+(b??0),0)*factor);
@@ -24,9 +25,8 @@ function apply(data,items,week,tools){const budgets=new Map(),byProduct=new Map(
  budgets.set(key,Math.max(0,(available-used)*factor));
  if(missing===0)return [];
  if(stocks.some(s=>!Number.isFinite(s.quantity)))return issue('quantité en Stock inconnue.');
- if(stockUnits.some(u=>!u))return issue('unité du Stock non renseignée.');
+ if(stockUnits.some((u,i)=>!u&&stocks[i].quantity!==0))return issue('unité du Stock non renseignée.');
  if(converted.some(n=>n===null))return issue('unités incompatibles : Stock ('+[...new Set(stockUnits)].join(', ')+') / recette ('+unit+').');
- const displayUnit=p.purchaseUnit||item.purchaseDisplay?.unit;
  const convert=q=>model?model.convert(q,unit,displayUnit,p,null,tools):tools.quantityIn({quantity:q,unit},displayUnit);
  const convertedMissing=displayUnit&&displayUnit!==unit?convert(missing):missing;
  if(convertedMissing===null)return issue('conditionnement à préciser.');
