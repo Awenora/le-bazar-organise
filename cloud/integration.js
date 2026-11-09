@@ -2,7 +2,10 @@
 (function(){
   const cloud=window.BazarCloud;
   cloud.currentPage=()=>page;
-  function same(a,b){return JSON.stringify(a)===JSON.stringify(b);}
+  function same(a,b){
+    const keys=Object.keys(a);
+    return keys.length===Object.keys(b).length&&keys.every(key=>Object.hasOwn(b,key)&&JSON.stringify(a[key])===JSON.stringify(b[key]));
+  }
   let menuRefreshDeferred=false;
   function recipeMenuOpen(){
     const targeted=page==='Carnets'||page==='Recettes'||(page==='À table !'&&tab==='Recettes');
@@ -12,6 +15,7 @@
     const menu=recipeMenuOpen();if(menu)menuRefreshDeferred=true;
     return menu||document.querySelector('#dialog')?.open||
     (typeof visualEditSession!=='undefined'&&visualEditSession)||
+    (phoneAppearanceLocked&&page==='Courses'&&document.querySelector('.courses-line.is-in-cart input[data-cart]:disabled'))||
     document.activeElement?.matches('input,textarea,select,[contenteditable=true]');}
   function exportLocal(){
     const blob=new Blob([JSON.stringify(cloud.engine.view(),null,2)],{type:'application/json'});
