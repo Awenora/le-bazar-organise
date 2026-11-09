@@ -39,7 +39,7 @@
   style.textContent=`
     #calendar .day.bazar-special-day { position:relative; isolation:isolate; }
     #calendar .day.bazar-special-day::after {
-      content:''; position:absolute; inset:1px; border:4px solid #D9C1A8;
+      content:''; position:absolute; inset:1px; border:4px solid #C5A17A;
       border-radius:8px; pointer-events:none; z-index:5;
       box-shadow:inset 0 0 0 1px rgba(255,249,239,.8),0 0 0 1px rgba(91,59,34,.55);
     }
@@ -47,7 +47,7 @@
     #calendar .day .bazar-holiday-label {
       position:absolute; top:1px; left:50%; transform:translateX(-50%);
       z-index:6; pointer-events:none; white-space:nowrap;
-      background:#D9C1A8; color:#382719; border-radius:0 0 4px 4px;
+      background:#C5A17A; color:#382719; border-radius:0 0 4px 4px;
       padding:1px 6px; font:700 9px/12px 'Segoe UI',Arial,sans-serif;
       letter-spacing:.2px;
     }
