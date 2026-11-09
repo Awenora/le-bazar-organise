@@ -119,3 +119,25 @@ body.visual-editing .courses-board > .courses-table { pointer-events:auto; }
  #main:has(.courses-workspace){overflow:hidden!important;overscroll-behavior:none}
  #main>.courses-workspace{height:100%;min-height:0;box-sizing:border-box;overflow:hidden}
 }
+
+/* Sur téléphone, seuls les tableaux défilent sous les commandes. */
+@media (max-width: 850px) {
+ .phone-appearance-locked #main:has(> .courses-workspace) {
+  overflow: hidden !important;
+ }
+ .phone-appearance-locked #main > .courses-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+ }
+ .phone-appearance-locked .courses-workspace > .courses-list-toolbar {
+  flex: 0 0 auto;
+ }
+ .phone-appearance-locked .courses-workspace > .courses-board {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+ }
+}

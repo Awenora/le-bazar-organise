@@ -18,3 +18,22 @@ select.profile{max-width:170px;cursor:pointer}
 /* Corbeille sur la même ligne que Des idées. */
 .planning-view .planner-tools #trashZone,.image-month .planner-tools #trashZone{top:var(--ideas-top,auto);bottom:auto}
 
+
+/* Sur téléphone, les onglets utilisent toute la largeur disponible. */
+@media (max-width: 950px) {
+ .phone-appearance-locked #navigationHome {
+  margin-left: 0;
+  width: 100%;
+  max-width: 100%;
+ }
+ .phone-appearance-locked #globalNav {
+  width: 100% !important;
+  height: auto !important;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+ }
+ .phone-appearance-locked #globalNav > button {
+  padding-inline: 5px;
+  max-width: 100%;
+ }
+}
