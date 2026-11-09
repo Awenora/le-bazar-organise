@@ -24,7 +24,7 @@ shoppingItems=function(){
 
  const weekKey=datekey(page==='Courses'?coursesWeek():week);
 
- return ingredientReplacements.purchaseRows(data,ingredientReplacements.stockRemainders(data,inputs,stockTools),weekKey,stockTools).filter(row=>!(row.stockRemainder===0&&!row.adjustment&&!row.buyManual)).map(row=>{
+ return ingredientReplacements.purchaseRows(data,window.BazarPurchaseStock?inputs:ingredientReplacements.stockRemainders(data,inputs,stockTools),weekKey,stockTools).filter(row=>!(row.stockRemainder===0&&!row.adjustment&&!row.buyManual)).map(row=>{
 
   if(row.adjustment?.unitExplicit&&!row.buyManual)return {...row,purchaseDisplay:{quantity:row.adjustment.quantity,unit:row.adjustment.unit,format:''}};if(row.replacementTarget||row.habitualProduct?.purchaseUnit||!row.purchaseDisplay||row.stockRemainder===undefined||row.adjustment||row.buyManual)return row;
 

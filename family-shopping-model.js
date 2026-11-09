@@ -1,6 +1,28 @@
 (function(root){'use strict';
 const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/œ/g,'oe').replace(/[’‘]/g,"'").toLowerCase().replace(/\s+/g,' ').trim();
 const productKey=s=>norm(s).replace(/(\d)[,](\d)/g,'$1.$2').replace(/[\s()'’\-]+/g,'');
+// Strip preparation, intended use, packaging and shop labels, not product varieties.
+function ingredientName(text,tools=root.BazarStockTools){
+ const parsed=tools?.parseIngredient?.(text);
+ return norm(parsed?.normalized||text)
+  .replace(/\s+[–—-]\s+(?:lidl|intermarche|carrefour|auchan|leclerc|aldi|super u)$/,'')
+  .replace(/[\s–—(-]+\d+(?:[,.]\d+)?\s*(?:kg|g|ml|cl|l)\s*\)?$/,'')
+  .replace(/^(?:emince|hache|rape|tranche|filet|blanc)(?:e|es|s)?\s+(?:de\s+|d')/,'')
+  .replace(/\s+(?:emince|hache|rape|tranche)(?:e|es|s)?$/,'')
+  .replace(/\s+(?:pour (?:la |le |les |l')?.+|grain(?:s)? (?:fin|moyen|gros)s?|moyen|gateau|dejeuner|ptit dej)$/,'')
+  .trim();
+}
+function recipeIngredient(item,tools){
+ return ingredientName(item.name||item.text,tools);
+}
+function matchingIngredientProducts(d,item,tools){
+ const key=recipeIngredient(item,tools);
+ return key?(d.shoppingCatalog||[]).filter(p=>[p.name,...String(p.aliases||'').split(',')].some(n=>ingredientName(n,tools)===key)):[];
+}
+function hasIngredientChoice(d,item,tools){
+ return !!(item.replacementTarget||item.replacementIssue||item.habitualProduct||item.catalogId||
+  (item.texts||[item.text]).some(text=>Object.hasOwn(d.shoppingIngredientProducts||{},tools?.parseIngredient?.(text)?.normalized||norm(text))));
+}
 const family=s=>(/^assaison/.test(norm(s))||norm(s)==='condiments')?'Condiments':String(s||'Sans catégorie').trim();
 const id=prefix=>prefix+'-'+(root.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2));
 function ensure(d){d.familyShopping??={version:1,teams:[{id:'wed-lidl',name:'Mercredi — Lidl',day:3,store:'Lidl',participants:['GG','Audrey'],active:true},{id:'thu-inter',name:'Jeudi — Intermarché',day:4,store:'Intermarché',participants:['Jérémy'],active:true},{id:'fri-inter',name:'Vendredi — Intermarché',day:5,store:'Intermarché',participants:['Audrey','Emily'],notes:'Gros conditionnements et produits non réfrigérés, selon les besoins.',active:true}],locations:[{id:'kitchen',name:'Cuisine',emoji:'🍽️'},{id:'utility',name:'Buanderie',emoji:'🧺'},{id:'bathroom',name:'Salle de bain',emoji:'🛁'},{id:'dressing',name:'Dressing',emoji:'👕'}],overrides:{},imports:{}};const s=d.familyShopping;s.overrides??={};s.imports??={};return s;}
@@ -41,14 +63,9 @@ function productFor(d,item,tools=root.BazarStockTools){
  const preparation=[...new Set([item.name,item.text,...names].filter(Boolean).map(preparedName).filter(Boolean))];
  const candidates=preparation.length?(index?indexMatches(index.prepared,preparation):catalogue.filter(p=>preparation.includes(cataloguePreparedName(p)))):[];
  if(candidates.length)return candidates.length===1?candidates[0]:null;
- // An unqualified recipe ingredient can use the confirmed medium-grain product.
- // Use physical, catalogued rows to avoid selecting an old catalogue duplicate.
- if(item.uses?.length&&names.every(name=>name==='semoule')){
-  const stock=(d.inventory?.items||[]).filter(row=>row.catalogId&&/^semoule(?: |$)/.test(norm(row.name)));
-  if(stock.length&&stock.every(row=>norm(row.name)==='semoule grain moyen')){
-   const stockIds=new Set(stock.map(row=>row.catalogId));
-   if(stockIds.size===1)return findId(stock[0].catalogId)||null;
-  }
+ if(item.uses?.length&&!item.manual){
+  const matches=matchingIngredientProducts(d,item,tools);
+  if(matches.length===1)return matches[0];
  }
  return null;
 }
@@ -62,15 +79,33 @@ function routeFor(d,item,tools=root.BazarStockTools,legacyKey=root.shoppingProdu
  const pick=values=>values.find(valid);
  // Confirmed habits affect the displayed destination, never the aggregation identity or one-off choices.
  const confirmedHabit=item.identity&&habit?.confirmed&&!item.oneOff?habit:null;
- const store=pick([confirmedHabit?.store,d.shops?.[item.key],item.routingStore,item.replacementStore,item.purchaseStore,item.orphan?item.store:undefined,unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,product?.store,d.shops?.[catalogKey]]);
- const learnedRoutes=store?null:learned();
- const resolvedStore=store||unanimous(learnedRoutes.map(r=>r.store));
- const family=pick([confirmedHabit?.family,d.productFamilies?.[item.key],item.replacementFamily,item.purchaseFamily,item.orphan?item.family:undefined,unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,product?.family,d.productFamilies?.[catalogKey]]);
- const resolvedFamily=family||unanimous((learnedRoutes||learned()).map(r=>r.family));
+ const automaticRecipe=item.uses?.length&&!item.manual&&!hasIngredientChoice(d,item,tools);
+ if(!automaticRecipe){
+  const store=pick([confirmedHabit?.store,d.shops?.[item.key],item.routingStore,item.replacementStore,item.purchaseStore,item.orphan?item.store:undefined,unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,product?.store,d.shops?.[catalogKey]]);
+  const family=pick([confirmedHabit?.family,d.productFamilies?.[item.key],item.replacementFamily,item.purchaseFamily,item.orphan?item.family:undefined,unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,product?.family,d.productFamilies?.[catalogKey]]);
+  return {store:store||unanimous(learned().map(r=>r.store)),family:family||unanimous(learned().map(r=>r.family))};
+ }
+ const equivalents=matchingIngredientProducts(d,item,tools);
+ const confirmed=equivalents.filter(p=>p.storeConfirmed||d.shoppingProductRoutes?.['catalog:'+p.id]?.confirmed);
+ const habitFor=p=>d.shoppingProductRoutes?.['catalog:'+p.id];
+ const knownStores=confirmed.map(p=>habitFor(p)?.store||p.store);
+ const knownFamilies=confirmed.map(p=>habitFor(p)?.family||p.family);
+ const learnedRoutes=learned();
+ const isOil=/^huile(?: |$)/.test(recipeIngredient(item,tools));
+ const suggestedFamily=p=>isOil&&norm(p?.family)==='conserves'&&!p?.storeConfirmed?undefined:p?.family;
+ const resolvedFamily=pick([confirmedHabit?.family,d.productFamilies?.[item.key],item.replacementFamily,
+  unanimous(keys.map(k=>d.productFamilies?.[k])),targetRoute?.family,habit?.family,
+  unanimous(learnedRoutes.map(r=>r.family)),unanimous(knownFamilies),item.purchaseFamily,
+  suggestedFamily(product),d.productFamilies?.[catalogKey],unanimous(equivalents.map(suggestedFamily))]);
+ const resolvedStore=pick([confirmedHabit?.store,d.shops?.[item.key],item.replacementStore,
+  unanimous(keys.map(k=>d.shops?.[k])),targetRoute?.store,habit?.store,
+  unanimous(learnedRoutes.map(r=>r.store)),unanimous(knownStores),item.routingStore,item.purchaseStore,
+  product?.store,d.shops?.[catalogKey],d.shopRules?.[resolvedFamily],
+  unanimous(equivalents.map(p=>p.store))]);
  return {store:resolvedStore,family:resolvedFamily};
 }
 function teamFor(d,item,week){const s=ensure(d),ref=reference(item),p=productFor(d,item),override=s.overrides[week]?.[ref]??(p?s.overrides[week]?.['catalog:'+p.id]:undefined);const teamId=override?.teamId??p?.teamId??s.habits?.[ref]?.teamId??'';return s.teams.find(t=>t.id===teamId&&t.active!==false)||null;}
 function transfer(d,item,week,teamId){const s=ensure(d),team=s.teams.find(t=>t.id===teamId&&t.active!==false);if(teamId&&!team)throw Error('Équipe introuvable.');s.overrides[week]??={};s.overrides[week][reference(item)]={teamId:team?.id||'',store:team?.store||''};}
 function saveTeam(d,values,teamId){const s=ensure(d),existing=s.teams.find(t=>t.id===teamId),name=String(values.name||'').trim(),store=String(values.store||'').trim(),day=Number(values.day);if(!name||!store||!Number.isInteger(day)||day<0||day>6)throw Error('Renseigne le nom, le jour et le magasin.');const row=existing||{id:id('team')};Object.assign(row,{name,store,day,participants:[...new Set(values.participants||[])],notes:String(values.notes||''),active:values.active!==false});if(!existing)s.teams.push(row);return row;}
-const api={norm,productKey,family,resolveFamily,id,ensure,renameFamilies,productKeys,importCatalog,reference,productFor,routeFor,withProductReadCache,invalidateProductReadCache,teamFor,transfer,saveTeam};root.BazarFamilyShopping=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+const api={norm,productKey,family,resolveFamily,id,ensure,renameFamilies,productKeys,importCatalog,reference,productFor,ingredientName,recipeIngredient,hasIngredientChoice,routeFor,withProductReadCache,invalidateProductReadCache,teamFor,transfer,saveTeam};root.BazarFamilyShopping=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

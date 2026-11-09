@@ -8,10 +8,10 @@ function collect(data,start,end,tools){
    if(!['midi','soir'].includes(slot))continue;
    const r=recipes.get(meal?.recipeId);if(!r)continue;
    for(const text of r.ingredients||[]){
+    if(!String(text||'').trim()||/^pour\s+(?:la\s|le\s|les\s|l['’])/i.test(String(text).trim()))continue;
     const key=tools.key(text);
     const mealRule=meal.ingredientReplacements?.[key],replacementRule=mealRule===undefined?root.BazarIngredientReplacements?.find(data,r.id,text,tools)?.rule:mealRule;
     if(replacementRule?.kind==='home')continue;
-    if(data.confirmedIngredients?.[key]&&data.stock?.[key]!==false&&(!replacementRule||replacementRule.disabled))continue;
     const p=tools.parseIngredient(text);
     const reference=Number(r.portions),selected=Number(meal.portions),portions=Number.isFinite(selected)&&selected>0?selected:reference,quantity=p.quantity===null?null:Number.isFinite(reference)&&reference>0&&Number.isFinite(portions)&&portions>0?p.quantity*portions/reference:p.quantity;
     const replacement=root.BazarIngredientReplacements?.apply(data,r.id,text,quantity,p.unit,tools,mealRule);

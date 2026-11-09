@@ -5,11 +5,7 @@ const groups={Viandes:['viande','viandes','boucherie'],'Fruits et légumes':['fr
 function family(v){const key=norm(v);return Object.keys(groups).find(k=>groups[k].includes(key))||String(v||'Sans catégorie').trim();}
 function families(d,store){return [...new Set([...(d.shoppingCategories?.[store]||[]),...(d.shoppingRouting?.families||[]),...(d.shoppingCatalog||[]).filter(p=>!store||p.store===store).map(p=>p.family),...Object.values(d.productFamilies||{})].filter(Boolean).map(family))].sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base',numeric:true}));}
 function addFamily(d,store,name){if(!String(name||'').trim())throw Error('Indique un nom de rayon.');name=family(name);if(!name||norm(name)==='sans categorie')throw Error('Indique un nom de rayon.');const existing=families(d).find(v=>norm(v)===norm(name));name=existing||name;d.shoppingCategories??={};d.shoppingCategories[store]??=[];if(!d.shoppingCategories[store].some(v=>norm(family(v))===norm(name)))d.shoppingCategories[store].push(name);return name;}
-// This exact catalogue reference has a confirmed 1 kg packet.
-const semolinaId='catalog-8a630efc-2575-4d0e-970d-935de798665e';
-function purchaseUnit(p){
- return p?.purchaseUnit||(p?.id===semolinaId?'paquet':'');
-}
+function purchaseUnit(p){return p?.purchaseUnit||'';}
 function container(unit){return norm(unit).replace(/s$/,'');}
 function formatSize(format){
  const match=String(format||'').trim().match(/^(\d+(?:[.,]\d+)?)\s*(kg|g|ml|cl|l)$/i);
@@ -21,9 +17,6 @@ function size(p,row){
  const candidates=[row?.packSize,formatSize(row?.format)];
  if(sameContainer){
   candidates.push(p?.purchasePack,formatSize(p?.purchaseFormat));
-  if(p?.id===semolinaId&&container(unit)==='paquet'&&!p.purchasePack&&!p.purchaseFormat){
-   candidates.push({quantity:1,unit:'kg'});
-  }
  }
  return candidates.find(v=>v&&Number.isFinite(v.quantity)&&v.quantity>0&&/^(kg|g|ml|cl|l)$/i.test(v.unit));
 }
