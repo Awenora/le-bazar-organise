@@ -41,7 +41,7 @@
     #calendar .day.bazar-special-day::after {
       content:''; position:absolute; inset:1px; border:4px solid #C5A17A;
       border-radius:8px; pointer-events:none; z-index:5;
-      box-shadow:inset 0 0 0 1px rgba(255,249,239,.8),0 0 0 3px rgba(91,59,34,.55);
+      box-shadow:inset 0 0 0 1px rgba(255,249,239,.8),0 0 0 5px rgba(91,59,34,.55);
     }
     #calendar .day.bazar-public-holiday .dayhead { padding-top:13px; }
     #calendar .day .bazar-holiday-label {
