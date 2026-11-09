@@ -18,6 +18,7 @@ renderVisualEditor=function(){sideQuickRenderBefore();if(!sideQuickContext()||vi
 };
 function openSideQuickFilters(){startVisualEditor();selectVisualTarget(quickFilterKey);const input=document.querySelector('#quickFilterNewLabel');input?.scrollIntoView({block:'center'});input?.focus();}
 function saveSideQuickFilter(label,kind,value){
+ if(phoneAppearanceLocked)return false;
  label=String(label||'').trim().slice(0,80);value=String(value||'').trim().slice(0,120);
  if(!label||!value||!['category','keyword'].includes(kind)||kind==='category'&&!data.categories.includes(value))return false;
  const prefs=visualEditSession?.draft||data.visualPreferences||{},next=structuredClone(prefs),cfg=quickFilterTools.clean(next.sideQuickRecipeFilters||next.quickRecipeFilters,data.categories);
@@ -35,5 +36,5 @@ function addSideQuickFilterDialog(){
  $('#sideQuickLabel').focus();
 }
 const sideQuickDropdownBefore=recipeCategoriesDropdown;
-recipeCategoriesDropdown=function(button,root){sideQuickDropdownBefore(button,root);if(root?.id!=='side')return;const menu=document.querySelector('.bazar-action-menu');if(!menu)return;for(const [label,run]of [['＋ Ajouter un filtre rapide…',addSideQuickFilterDialog],['Organiser les filtres rapides…',openSideQuickFilters]].reverse()){const add=document.createElement('button');add.type='button';add.setAttribute('role','menuitem');add.textContent=label;add.onclick=()=>{closeActions();run();};menu.prepend(add);}};
+recipeCategoriesDropdown=function(button,root){sideQuickDropdownBefore(button,root);if(phoneAppearanceLocked||root?.id!=='side')return;const menu=document.querySelector('.bazar-action-menu');if(!menu)return;for(const [label,run]of [['＋ Ajouter un filtre rapide…',addSideQuickFilterDialog],['Organiser les filtres rapides…',openSideQuickFilters]].reverse()){const add=document.createElement('button');add.type='button';add.setAttribute('role','menuitem');add.textContent=label;add.onclick=()=>{closeActions();run();};menu.prepend(add);}};
 applyVisualPreferences();

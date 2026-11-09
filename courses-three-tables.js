@@ -20,6 +20,7 @@ function coursesCategorySettings(store,family){const oldId=encodeURIComponent(st
 const storeCategoriesBeforePresentation=storeCategories;
 storeCategories=function(store){const primary=coursesPrimaryStore(store),extra=Object.entries(coursesPresentation().categories?.[primary]||{}).filter(([name,cfg])=>!cfg.removed).map(([name])=>name);return [...new Set([...storeCategoriesBeforePresentation(store),...extra])];};
 function courseCategoryTools(store){
+ if(phoneAppearanceLocked)return;
  if(!visualEditSession)startVisualEditor();page='Courses';shopping();
  const families=[...new Set([...(store==='Autres'?shoppingStores.filter(s=>!coursesPrimaryStores.slice(0,2).includes(s)).flatMap(storeCategories):storeCategories(store)),...Object.keys(coursesPresentation().categories?.[store]||{})])];
  modal('<h2>Catégories · '+esc(store)+'</h2><p>Modifications dans le brouillon. Enregistrer dans Personnaliser le site pour les conserver. Retirer une catégorie visuelle conserve ses produits.</p><div id="courseCategoryRows">'+families.map((family,i)=>{const cfg=coursesCategorySettings(store,family);return '<div class="course-category-settings"><label>'+esc(family)+'<input data-category-name="'+i+'" value="'+esc(cfg.label||family)+'"></label><label><input type="checkbox" data-category-hidden="'+i+'" '+(cfg.hidden?'checked':'')+'> Masquer</label><label><input type="checkbox" data-category-collapsed="'+i+'" '+(cfg.collapsed?'checked':'')+'> Replier</label><button type="button" data-category-remove="'+i+'">'+(cfg.removed?'Restaurer':'Retirer')+'</button></div>';}).join('')+'</div><form id="courseCategoryAdd"><label class="field">Nouvelle catégorie<input id="courseCategoryNew" required maxlength="80"></label><button>Ajouter</button></form><button type="button" id="courseCategoryDone">Revenir à l’éditeur</button>');
@@ -49,7 +50,9 @@ function coursesBuildPrimaryTables(){
   const descriptorId='courses-categories-'+store;
   if(!sharedVisualGroups.some(e=>e.id===descriptorId))sharedVisualGroups.push({id:descriptorId,name:'Courses · Catégories '+store,selector:'#'+CSS.escape(stack.id),items:':scope > .courses-primary-category',essential:true,reorder:true});
   card.querySelector('.course-primary-add').onclick=()=>shoppingIngredientDialog(store);
-  card.querySelector('.course-primary-categories').onclick=()=>courseCategoryTools(store);cards.push(card);
+  const categoryTools=card.querySelector('.course-primary-categories');
+  if(phoneAppearanceLocked)categoryTools.setAttribute('aria-label','Ajouter un rayon ou un article · '+store);
+  categoryTools.onclick=()=>courseCategoryTools(store);cards.push(card);
  }
  document.querySelector('#coursesUnassigned')?.remove();const unknown=rows.map(row=>items[+row.dataset.courseIndex]).filter(item=>storeOf(item)==='À affecter');if(unknown.length){const pending=document.createElement('div');pending.id='coursesUnassigned';const choose=document.createElement('button');choose.type='button';choose.id='coursePendingOpen';choose.dataset.siteVisualKey='course:control-unassigned';choose.dataset.pendingCount=unknown.length;choose.textContent='À affecter ('+unknown.length+')';choose.onclick=coursePendingDialog;document.querySelector('.courses-list-toolbar').append(choose);}
  board.replaceChildren(...cards);$('#courseStoreHandles')?.remove();courseDecorateLayout();

@@ -10,6 +10,12 @@ courseCategoryTools=function(store){
 
  modal('<h2>'+(store==='Autres'?'Magasins / sous-catégories':'Rayons')+' · '+esc(store)+'</h2><form id="compactCategoryForm"><label class="field">Action<select id="compactCategoryAction"><option value="add">'+(store==='Autres'?'Ajouter un magasin / sous-catégorie':'Ajouter')+'</option><option value="article">Ajouter un article</option><option value="rename">Renommer</option><option value="move">Déplacer dans l’ordre</option><option value="hide">Masquer</option><option value="remove">Retirer le regroupement</option><option value="restore">Restaurer / réafficher</option></select></label><label class="field" id="compactCategoryChoice">Rayon<select id="compactCategory">'+families.map(name=>'<option value="'+esc(name)+'">'+esc(coursesCategorySettings(store,name).label||name)+(coursesCategorySettings(store,name).removed?' · retiré':coursesCategorySettings(store,name).hidden?' · masqué':'')+'</option>').join('')+'</select></label><label class="field" id="compactCategoryNameField">Nom<input id="compactCategoryName" maxlength="80"></label><label class="field" id="compactCategoryBeforeField">Placer avant<select id="compactCategoryBefore"><option value="">En dernier</option>'+families.map(name=>'<option value="'+esc(name)+'">'+esc(coursesCategorySettings(store,name).label||name)+'</option>').join('')+'</select></label><p id="compactCategoryError" role="alert"></p><small>Les produits sont conservés. Un rayon masqué ou retiré reste récupérable ici.</small><div class="actions"><button class="primary" type="submit">Valider</button><button type="button" id="compactCategoryCancel">Annuler</button></div></form>');
 
+ if(phoneAppearanceLocked){
+  const actions=$('#compactCategoryAction');
+  for(const option of [...actions.options])if(!['add','article'].includes(option.value))option.remove();
+  $('#compactCategoryForm small').remove();
+ }
+
  const dialog=$('#dialog');dialog.classList.add('compact-course-popup');
 
  const cleanup=()=>{dialog.classList.remove('compact-course-popup');dialog.removeEventListener('click',outside);};
@@ -22,7 +28,11 @@ courseCategoryTools=function(store){
 
  $('#compactCategoryAction').onchange=draw;$('#compactCategory').onchange=draw;draw();
 
- $('#compactCategoryForm').onsubmit=e=>{e.preventDefault();const action=$('#compactCategoryAction').value;let family=$('#compactCategory').value,name=$('#compactCategoryName').value.trim();if(action==='article'){dialog.close();shoppingIngredientDialog(store);const select=$('#shoppingIngredientFamily');if(select&&[...select.options].some(o=>o.value===family))select.value=family;return;}if(action==='add'){if(!name)return;family=names.find(n=>stockTools.norm(n)===stockTools.norm(name))||name;}if(!family){$('#compactCategoryError').textContent='Choisis un rayon.';return;}if(action==='remove'&&!confirm('Retirer uniquement ce regroupement ? Ses produits restent dans le tableau.'))return;
+ $('#compactCategoryForm').onsubmit=e=>{e.preventDefault();const action=$('#compactCategoryAction').value;let family=$('#compactCategory').value,name=$('#compactCategoryName').value.trim();if(action==='article'){dialog.close();shoppingIngredientDialog(store);const select=$('#shoppingIngredientFamily');if(select&&[...select.options].some(o=>o.value===family))select.value=family;return;}if(phoneAppearanceLocked){
+   if(action!=='add'||!name)return;
+   if(!familyCommit(()=>BazarCoursesOrganisation.addFamily(data,store,name),false))return;
+   dialog.close();shopping();return;
+  }if(action==='add'){if(!name)return;family=names.find(n=>stockTools.norm(n)===stockTools.norm(name))||name;}if(!family){$('#compactCategoryError').textContent='Choisis un rayon.';return;}if(action==='remove'&&!confirm('Retirer uniquement ce regroupement ? Ses produits restent dans le tableau.'))return;
 
   prefs.coursesPresentation??={categories:{}};prefs.coursesPresentation.categories??={};prefs.coursesPresentation.categories[store]??={};const cfg=prefs.coursesPresentation.categories[store][family]??={};
 

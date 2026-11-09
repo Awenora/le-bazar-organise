@@ -4,6 +4,11 @@ const visualPilotRegistry={
  search:{selector:'.recipe-toolstrip .recipe-compact-search',label:'Recherche Recettes',min:140,max:600,alpha:73,spacing:8},
  stock:{selector:'.free-stock-card[data-free-category]',label:'Tableau Stock',min:230,max:800,alpha:79,spacing:5}
 };
+// La largeur de la fenêtre sert aux aperçus, pas à autoriser la personnalisation.
+const phoneAppearanceLocked = navigator.userAgentData?.mobile === true
+  || /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent)
+  || (window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) <= 600);
+document.documentElement.classList.toggle('phone-appearance-locked', phoneAppearanceLocked);
 let visualEditSession=null;
 function cleanVisualPreferences(value){const result={version:1,elements:{}};if(!value||typeof value!=='object')return result;for(const [key,v] of Object.entries(value.elements||{})){if(key!=='search'&&!key.startsWith('stock:'))continue;if(!v||typeof v!=='object')continue;const type=key==='search'?'search':'stock',r=visualPilotRegistry[type],p={};for(const [name,min,max] of [['width',r.min,r.max],['alpha',0,100],['spacing',0,32]])if(typeof v[name]==='number'&&Number.isFinite(v[name]))p[name]=Math.min(max,Math.max(min,v[name]));if(Object.keys(p).length)result.elements[key]=p}return result}
 function visualSelector(key){return key==='search'?'#main '+visualPilotRegistry.search.selector:'#main .free-stock-card[data-free-category='+JSON.stringify(key.slice(6))+']'}
@@ -12,9 +17,9 @@ function applyVisualPreferences(){let style=document.querySelector('#visualPrefe
 function visualTarget(key){return document.querySelector(visualSelector(key))}
 function visualValues(key){const type=key==='search'?'search':'stock',r=visualPilotRegistry[type],target=visualTarget(key),p=visualEditSession.draft.elements[key]||{};return {width:p.width??Math.round(target?.offsetWidth||(type==='search'?320:290)),alpha:p.alpha??r.alpha,spacing:p.spacing??r.spacing}}
 function selectVisualTarget(key){if(!visualEditSession||!visualTarget(key))return;visualEditSession.key=key;applyVisualPreferences();renderVisualEditor()}
-function startVisualEditor(){if(visualEditSession)return;$('#dialog').close();const baseline=cleanVisualPreferences(data.visualPreferences);visualEditSession={baseline,draft:structuredClone(baseline),key:null};document.body.classList.add('visual-editing');if(!['Recettes','Réserves'].includes(page)){page='Recettes';render()}applyVisualPreferences();renderVisualEditor()}
+function startVisualEditor(){if(phoneAppearanceLocked||visualEditSession)return;$('#dialog').close();const baseline=cleanVisualPreferences(data.visualPreferences);visualEditSession={baseline,draft:structuredClone(baseline),key:null};document.body.classList.add('visual-editing');if(!['Recettes','Réserves'].includes(page)){page='Recettes';render()}applyVisualPreferences();renderVisualEditor()}
 function closeVisualEditor(){visualEditSession=null;document.body.classList.remove('visual-editing');document.querySelector('#visualEditorPanel')?.remove();applyVisualPreferences()}
-function saveVisualEditor(){if(!visualEditSession)return false;const previous=data.visualPreferences;data.visualPreferences=cleanVisualPreferences(visualEditSession.draft);if(!save()){if(previous===undefined)delete data.visualPreferences;else data.visualPreferences=previous;return false}closeVisualEditor();return true}
+function saveVisualEditor(){if(phoneAppearanceLocked||!visualEditSession)return false;const previous=data.visualPreferences;data.visualPreferences=cleanVisualPreferences(visualEditSession.draft);if(!save()){if(previous===undefined)delete data.visualPreferences;else data.visualPreferences=previous;return false}closeVisualEditor();return true}
 function cancelVisualChanges(){if(!visualEditSession)return;visualEditSession.draft=structuredClone(visualEditSession.baseline);applyVisualPreferences();renderVisualEditor()}
 function resetVisualElement(){if(!visualEditSession?.key)return;delete visualEditSession.draft.elements[visualEditSession.key];applyVisualPreferences();renderVisualEditor()}
 function updateVisualProperty(name,value){if(!visualEditSession?.key||!['width','alpha','spacing'].includes(name))return;const key=visualEditSession.key;visualEditSession.draft.elements[key]??={};visualEditSession.draft.elements[key][name]=Number(value);visualEditSession.draft=cleanVisualPreferences(visualEditSession.draft);applyVisualPreferences()}
@@ -26,8 +31,8 @@ document.addEventListener('keydown',event=>{if(visualEditSession&&event.key==='E
 const renderBeforeVisualPreferences=render;
 render=function(){renderBeforeVisualPreferences();applyVisualPreferences();if(visualEditSession)renderVisualEditor()};
 const settingsBeforeVisualEditor=$('#settings').onclick;
-$('#settings').onclick=function(){if(visualEditSession)closeVisualEditor();settingsBeforeVisualEditor();const row=[...document.querySelectorAll('.settings-coming')].find(e=>e.querySelector('span')?.textContent==='Personnaliser le site');if(row){const button=document.createElement('button');button.type='button';button.className='settings-personalize';button.textContent='Personnaliser le site';button.onclick=startVisualEditor;row.replaceWith(button)}};
+$('#settings').onclick=function(){if(visualEditSession)closeVisualEditor();settingsBeforeVisualEditor();if(phoneAppearanceLocked){$('.settings-coming')?.closest('.settings-section')?.remove();return;}const row=[...document.querySelectorAll('.settings-coming')].find(e=>e.querySelector('span')?.textContent==='Personnaliser le site');if(row){const button=document.createElement('button');button.type='button';button.className='settings-personalize';button.textContent='Personnaliser le site';button.onclick=startVisualEditor;row.replaceWith(button)}};
 applyVisualPreferences();
 /* Les poignées de largeur existantes continuent de fonctionner avec un réglage enregistré. */
 const attachResizeBeforeVisual=attachMenuResize;
-attachMenuResize=function(el,key,options={}){if(!key.startsWith('stock:')||options.apply)return attachResizeBeforeVisual(el,key,options);return attachResizeBeforeVisual(el,key,{...options,apply:width=>{el.style.width=width+'px';const preferences=visualEditSession?.draft||data.visualPreferences;if(preferences?.elements?.[key]?.width!==undefined){preferences.elements[key].width=width;applyVisualPreferences()}}})};
+attachMenuResize=function(el,key,options={}){if(phoneAppearanceLocked)return;if(!key.startsWith('stock:')||options.apply)return attachResizeBeforeVisual(el,key,options);return attachResizeBeforeVisual(el,key,{...options,apply:width=>{el.style.width=width+'px';const preferences=visualEditSession?.draft||data.visualPreferences;if(preferences?.elements?.[key]?.width!==undefined){preferences.elements[key].width=width;applyVisualPreferences()}}})};

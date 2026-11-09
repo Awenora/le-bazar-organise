@@ -16,3 +16,13 @@
 .visual-editing [data-visual-selected]{outline:3px solid #714523!important;outline-offset:3px}
 .settings-personalize{display:block;width:100%;text-align:left;font-size:14px;padding:8px 10px;margin-bottom:6px}
 @media(max-width:600px){#visualEditorPanel{width:280px;right:8px;bottom:8px;max-height:55dvh}}
+
+/* Poignées et raccourcis exclusivement réservés à la mise en page. */
+.phone-appearance-locked :is(.menu-width-handle, .notebook-position-grip,
+  [data-free-head], .courses-resize-handle, .course-table-grip, .course-table-resize,
+  #courseStoreHandles, .course-store-move, #courseArrange, [data-family-place-menu],
+  [data-sr-grip], [data-sr-resize], .layout-edit-check,
+  [data-organize-type='shop-store'] .organize-grip,
+  [data-organize-type='shop-category'] .organize-grip) {
+  display: none !important;
+}

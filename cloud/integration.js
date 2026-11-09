@@ -80,7 +80,16 @@
       if(incoming.version!==1||!Array.isArray(incoming.recipes)||!incoming.plans||!Array.isArray(incoming.categories)||!incoming.feedback||!incoming.recipes.every(r=>r.id&&r.name&&Array.isArray(r.ingredients)&&Array.isArray(r.steps)&&Array.isArray(r.categories)&&Array.isArray(r.favorites)))throw Error('Sauvegarde incompatible.');
       modal('<h2>Restaurer cette sauvegarde ?</h2><p>Une copie de la version actuelle sera conservée. Les modifications seront soumises aux contrôles de versions du foyer.</p><button id="confirmImport">Restaurer avec contrôle des versions</button>');
       $('#confirmImport').onclick=()=>{
-        const before=structuredClone(data);cloud.restoring=true;
+        const before=structuredClone(data);
+        if(phoneAppearanceLocked){
+          for(const key of ['visualPreferences','notebookLayout','notebookSizes','menuWidths','coursesLayout','stockCardOrder','profileOrder']){
+            if(Object.hasOwn(before,key))incoming[key]=before[key];
+            else delete incoming[key];
+          }
+          if(before.inventory?.layout)(incoming.inventory??={}).layout=before.inventory.layout;
+          else if(incoming.inventory)delete incoming.inventory.layout;
+        }
+        cloud.restoring=true;
         try{cloud.patch(data,incoming);if(!save()){cloud.patch(data,before);return;}$('#dialog').close();render();}
         finally{cloud.restoring=false;}
       };

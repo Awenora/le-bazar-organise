@@ -10,8 +10,9 @@ function budgetEditOnePanel(id,rename=false){
 }
 function budgetShowPanelMenu(id,anchor){
  budgetClosePanelMenu();const menu=document.createElement('div');menu.className='budget-panel-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label','Options du tableau');
- const actions=[['Renommer le tableau',()=>budgetEditOnePanel(id,true)],['Personnaliser ce tableau',()=>budgetEditOnePanel(id)]];
- actions.push(['Ajouter une catégorie',()=>budgetOpenCategoryCreation()],['Renommer les catégories / couleurs',()=>budgetManageEntities('categories')]);
+ const actions=[];
+ if(!phoneAppearanceLocked)actions.push(['Renommer le tableau',()=>budgetEditOnePanel(id,true)],['Personnaliser ce tableau',()=>budgetEditOnePanel(id)]);
+ actions.push(['Ajouter une catégorie',()=>budgetOpenCategoryCreation()],[phoneAppearanceLocked?'Renommer les catégories':'Renommer les catégories / couleurs',()=>budgetManageEntities('categories')]);
  actions.push(['Renommer les participants',()=>budgetManageEntities('participants')]);
  for(const [label,run]of actions){const button=document.createElement('button');button.type='button';button.setAttribute('role','menuitem');button.textContent=label;button.onclick=()=>{budgetClosePanelMenu();run();};menu.append(button);}
  document.body.append(menu);budgetOpenPanelMenu=menu;const r=anchor.getBoundingClientRect(),box=menu.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(r.right-box.width,innerWidth-box.width-8))+'px';menu.style.top=Math.max(8,Math.min(r.bottom+5,innerHeight-box.height-8))+'px';menu.querySelector('button')?.focus();
