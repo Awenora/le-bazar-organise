@@ -40,7 +40,17 @@ function productFor(d,item,tools=root.BazarStockTools){
  if(matches.length)return matches.length===1?matches[0]:null;
  const preparation=[...new Set([item.name,item.text,...names].filter(Boolean).map(preparedName).filter(Boolean))];
  const candidates=preparation.length?(index?indexMatches(index.prepared,preparation):catalogue.filter(p=>preparation.includes(cataloguePreparedName(p)))):[];
- return candidates.length===1?candidates[0]:null;
+ if(candidates.length)return candidates.length===1?candidates[0]:null;
+ // An unqualified recipe ingredient can use the confirmed medium-grain product.
+ // Use physical, catalogued rows to avoid selecting an old catalogue duplicate.
+ if(item.uses?.length&&names.every(name=>name==='semoule')){
+  const stock=(d.inventory?.items||[]).filter(row=>row.catalogId&&/^semoule(?: |$)/.test(norm(row.name)));
+  if(stock.length&&stock.every(row=>norm(row.name)==='semoule grain moyen')){
+   const stockIds=new Set(stock.map(row=>row.catalogId));
+   if(stockIds.size===1)return findId(stock[0].catalogId)||null;
+  }
+ }
+ return null;
 }
 function routeFor(d,item,tools=root.BazarStockTools,legacyKey=root.shoppingProduct){
  const product=productFor(d,item,tools),keys=[item.key,item.baseKey,...(item.sourceKeys||[]),...(item.baseKeys||[])].filter(Boolean);

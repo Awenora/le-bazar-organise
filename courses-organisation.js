@@ -145,7 +145,7 @@
  function openStock(item){
   const product=productOf(item),rows=stockRows(item);
   if(rows.length===1)return familyStockItemDialog(rows[0].id,product.id);
-  if(!rows.length)return toast('Aucune ligne de Stock associée à ce produit.');
+  if(!rows.length)return correct(item);
   modal('<h2>Choisir la ligne de Stock</h2><div class="actions">'+rows.map((row,i)=>'<button type="button" data-course-stock-choice="'+i+'">'+esc(row.name+' · '+(row.unit||'unité à préciser'))+'</button>').join('')+'</div>');
   $('#dialog').querySelectorAll('[data-course-stock-choice]').forEach(button=>{
    button.onclick=()=>familyStockItemDialog(rows[Number(button.dataset.courseStockChoice)].id,product.id);
@@ -154,8 +154,10 @@
  function correct(item){
   const product=productOf(item),rows=stockRows(item);
   const use=(item.uses||[]).find(u=>u.recipeId&&u.originalText&&recipe(u.recipeId)?.ingredients.includes(u.originalText));
+  const stockUnits=[...new Set(rows.map(BazarPurchaseStock.unitOf).filter(Boolean))];
+  const suggestedUnit=stockUnits.length===1?stockUnits[0]:'';
   const stockText=rows.length?rows.map(row=>row.name+' · '+(row.quantity??'à compter')+' '+(row.unit||'(unité à préciser)')).join(' / '):'Aucune ligne de Stock associée';
-  modal('<h2>Corriger · '+esc(item.name)+'</h2><p>'+esc(stockText)+'</p><form id="courseCorrectForm"><label class="field">Nom du produit<input name="name" required maxlength="180" value="'+esc(item.name)+'"></label><label class="field">Unité d’achat<input name="unit" maxlength="40" value="'+esc(product?.purchaseUnit||item.purchaseDisplay?.unit||item.unit||'')+'" placeholder="paquet, boîte, g…"></label><label class="field">Contenu d’un conditionnement<input name="format" maxlength="40" value="'+esc(product?.purchaseFormat||'')+'" placeholder="Ex. 400 g"></label>'+(use?'<button type="button" id="courseChooseProduct">Associer un produit pour '+esc(recipe(use.recipeId).name)+'</button>':'')+(rows.length?'<button type="button" id="courseOpenStock">Corriger la ligne de Stock</button>':'')+actions('Enregistrer')+'</form>');
+  modal('<h2>Corriger · '+esc(item.name)+'</h2><p>'+esc(stockText)+'</p><form id="courseCorrectForm"><label class="field">Nom du produit<input name="name" required maxlength="180" value="'+esc(product?.name||item.name)+'"></label><label class="field">Unité d’achat<input name="unit" maxlength="40" value="'+esc(product?.purchaseUnit||suggestedUnit||item.purchaseDisplay?.unit||item.unit||'')+'" placeholder="paquet, boîte, g…"></label><label class="field">Contenu d’un conditionnement<input name="format" maxlength="40" value="'+esc(product?.purchaseFormat||'')+'" placeholder="Ex. 400 g"></label>'+(use?'<button type="button" id="courseChooseProduct">Associer un produit pour '+esc(recipe(use.recipeId).name)+'</button>':'')+(rows.length?'<button type="button" id="courseOpenStock">Corriger la ligne de Stock</button>':'')+actions('Enregistrer')+'</form>');
   bindCancel();
   if(use)$('#courseChooseProduct').onclick=()=>habitualChoiceDialog(item);
   if(rows.length)$('#courseOpenStock').onclick=()=>openStock(item);
@@ -202,6 +204,13 @@
    ['Corriger le produit',()=>correct(item)],
    ['Déplacer / classer',()=>classify(item)],
    ['Accéder au Stock',()=>openStock(item)],
+   ...(!item.automaticRestock?[['Déjà en stock',()=>{
+    if(transact(()=>{
+     const wk=currentWeek();
+     courseList.exclude(data,wk,item);
+     data.shoppingExcluded[wk][item.identity].reason='stock';
+    }))shopping();
+   }]]:[]),
    ['Retirer des courses',()=>{if(transact(()=>courseList.exclude(data,currentWeek(),item)))shopping();}]
   ];
   for(const [label,fn] of entries){
