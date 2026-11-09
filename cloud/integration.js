@@ -48,6 +48,7 @@
     const next=cloud.engine.view();if(same(data,next))return;
     const scroll=[...document.querySelectorAll('*')].filter(el=>el.scrollTop||el.scrollLeft).map(rememberScroll).filter(Boolean),generation=++scrollGeneration,interaction=scrollInteraction,viewPage=page,viewTab=tab;
     cloud.patch(data,next);cloud.applied(data);
+    window.BazarAutomaticRestock?.invalidate?.();
     if(typeof budgetEmpty!=='undefined')budgetEmpty=null;
     render();
     restoreScroll(scroll);
