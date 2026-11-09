@@ -28,7 +28,7 @@
   for(const store of ['Lidl','Intermarché','Autres']){const option=document.createElement('button');option.type='button';option.setAttribute('role','menuitem');option.textContent=store;option.onclick=()=>{if(move(item,store))closeDestination();};menu.append(option);}
   document.body.append(menu);const rect=button.getBoundingClientRect();menu.style.left=Math.max(6,Math.min(rect.right-menu.offsetWidth,innerWidth-menu.offsetWidth-6))+'px';menu.style.top=Math.max(6,rect.bottom+menu.offsetHeight+6<=innerHeight?rect.bottom+3:rect.top-menu.offsetHeight-3)+'px';
  }
- document.addEventListener('click',event=>{if(!event.target.closest('#courseDestinationChoice,.course-simple-send'))closeDestination();});
+ document.addEventListener('click',event=>{if(!event.target.closest('#courseDestinationChoice,.course-simple-send,.course-purchase-menu'))closeDestination();});
  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeDestination();});
  window.addEventListener('resize',closeDestination);
  shoppingIngredientDialog=function(store){
@@ -60,9 +60,9 @@
    if(item.stockIssue){const note=document.createElement('small');note.className='course-simple-issue';note.id='course-stock-issue-'+row.dataset.courseIndex;note.textContent=item.stockIssue+' '+(/Stock inconnue|unité du Stock|Unités incompatibles|unités incompatibles/.test(item.stockIssue)?'Dans Stock, vérifie la quantité et le format du produit.':'Renseigne ici la quantité à acheter et le format ; les unités du Stock doivent correspondre.');product.append(note);row.querySelector('[data-list-quantity]')?.setAttribute('aria-describedby',note.id);}
   }
   for(const table of document.querySelectorAll('[data-course-primary]')){
-   table.addEventListener('dragover',event=>{if(!dragged||visualEditSession||dragged.wk!==weekKey())return;event.preventDefault();event.dataTransfer.dropEffect='move';table.classList.add('course-simple-drop');});
+   table.addEventListener('dragover',event=>{if(!dragged||visualEditSession||dragged.wk!==weekKey()||dragged.item.automaticRestock)return;event.preventDefault();event.dataTransfer.dropEffect='move';table.classList.add('course-simple-drop');});
    table.addEventListener('dragleave',event=>{if(!table.contains(event.relatedTarget))table.classList.remove('course-simple-drop');});
-   table.addEventListener('drop',event=>{if(!dragged||visualEditSession||dragged.wk!==weekKey())return;event.preventDefault();event.stopPropagation();const {item}=dragged;dragged=null;move(item,event.target.closest('[data-restock-store]')?.dataset.restockStore||table.dataset.coursePrimary);});
+   table.addEventListener('drop',event=>{if(!dragged||visualEditSession||dragged.wk!==weekKey()||dragged.item.automaticRestock)return;event.preventDefault();event.stopPropagation();const {item}=dragged;dragged=null;window.BazarCourseUI?.classify(item,table.dataset.coursePrimary,event.target.closest('.courses-primary-category')?.dataset.family);});
   }
  }
  // A newly added counter gets a free slot without rewriting saved command positions.

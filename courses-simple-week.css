@@ -33,3 +33,19 @@
 
 /* Le champ Marque est retiré des lignes, sans modifier les marques enregistrées. */
 .courses-primary-table .course-product-brand{display:none!important}
+
+/* The format stays in the data and the editor, outside the shopping line. */
+.courses-workspace .courses-line.course-stock-line.course-simple-line,
+.courses-workspace .course-column-labels.course-simple-columns {
+ grid-template-columns:var(--course-checkbox,30px) var(--course-quantity,40px) var(--course-product-track,minmax(0,1fr)) var(--course-purchase-menu-width,30px)!important;
+}
+.courses-workspace .course-simple-line>.course-product-format,
+.courses-workspace .course-simple-columns>[data-course-header="format"],
+#visualEditorPanel #coursesActionLayoutControls {display:none!important}
+.courses-workspace .course-simple-actions>.course-purchase-menu,
+.courses-workspace .course-purchase-issue {
+ border:0; border-radius:0; background:transparent; box-shadow:none;
+ color:inherit; padding:0;
+}
+.courses-workspace .course-simple-actions>.course-purchase-menu {min-width:24px; font-size:17px}
+.courses-workspace .course-purchase-issue {font:inherit; text-align:left; text-decoration:underline; min-height:0}
