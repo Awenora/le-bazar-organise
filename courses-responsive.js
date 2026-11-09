@@ -26,7 +26,13 @@ shopping=function(){
  $('#listExcluded').onclick=courseExcludedDialog;
  $('#listUndo').onclick=()=>{if(courseLastExcluded?.week===wk){courseList.restore(data,wk,courseLastExcluded.identity);courseLastExcluded=null;persist();shopping();}else undoCoursesAction();};
  if($('#listUndoExclude'))$('#listUndoExclude').onclick=()=>{courseList.restore(data,wk,courseLastExcluded.identity);courseLastExcluded=null;persist();shopping();};
- document.querySelectorAll('[data-cart]').forEach(input=>input.onchange=()=>{courseList.setChecked(data,wk,items[+input.dataset.cart],input.checked);persist();shopping();});
+ document.querySelectorAll('[data-cart]').forEach(input=>input.onchange=()=>{
+  const item=items[+input.dataset.cart];
+  changeCourseCart(input,wk,item,saved=>{
+   if(!saved&&lastCartCheck?.item.identity===item.identity)lastCartCheck=null;
+   if(page==='Courses'&&datekey(coursesWeek())===wk)shopping();
+  });
+ });
  document.querySelectorAll('[data-list-quantity]').forEach(input=>{function commit(showError){if(visualEditSession)return;const item=items[+input.dataset.listQuantity];if(!showError&&stockTools.amount(input.value)===null)return;try{courseList.setQuantity(data,wk,item,input.value,stockTools);persist();input.removeAttribute('aria-invalid');$('#main .courses-list-error').hidden=true;const details=input.closest('.courses-line').querySelector('details');details.querySelector('[data-list-auto]').hidden=false;details.querySelector('summary').textContent='Détails · Choix manuel'+(item.needChanged?' · Besoin modifié':'');}catch(e){input.setAttribute('aria-invalid','true');if(showError)error(e.message);}}input.oninput=()=>commit(false);input.onchange=()=>commit(true);input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commit(true);}};});
  document.querySelectorAll('[data-list-auto]').forEach(b=>b.onclick=()=>{courseList.automatic(data,wk,items[+b.dataset.listAuto]);persist();shopping();});
  document.querySelectorAll('[data-list-remove]').forEach(b=>b.onclick=()=>{const item=items[+b.dataset.listRemove];courseList.exclude(data,wk,item);courseLastExcluded={week:wk,identity:item.identity,name:item.name};persist();shopping();});
