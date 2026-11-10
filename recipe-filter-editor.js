@@ -4,7 +4,7 @@ let quickFilterActive=null;
 const cleanBeforeQuickFilters=cleanVisualPreferences;
 cleanVisualPreferences=function(value){const result=cleanBeforeQuickFilters(value);if(value?.quickRecipeFilters)result.quickRecipeFilters=quickFilterTools.clean(value.quickRecipeFilters,data.categories);return result;};
 function quickFilterPreferences(){return visualEditSession?.draft||data.visualPreferences||{};}
-function quickFilterMode(){return visualEditSession?.key===quickFilterKey&&visualEditSession.quickFilterMode||((window.innerWidth||1280)<=700?'mobile':'desktop');}
+function quickFilterMode(){return visualEditSession?.key===quickFilterKey&&visualEditSession.quickFilterMode||visualViewportMode;}
 function quickFilterConfig(){return quickFilterTools.effective(quickFilterPreferences().quickRecipeFilters,data.categories,quickFilterMode());}
 const selectorBeforeQuickFilters=visualSelector;
 visualSelector=function(key){return key===quickFilterKey?'.recipe-category-tabs':selectorBeforeQuickFilters(key);};

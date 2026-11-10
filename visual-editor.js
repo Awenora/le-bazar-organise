@@ -9,6 +9,11 @@ const phoneAppearanceLocked = navigator.userAgentData?.mobile === true
   || /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent)
   || (window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) <= 600);
 document.documentElement.classList.toggle('phone-appearance-locked', phoneAppearanceLocked);
+const mobileVisualQuery=window.matchMedia('(max-width: 700px)');
+let visualViewportMode=mobileVisualQuery.matches?'mobile':'desktop';
+function updateVisualViewportMode(){visualViewportMode=mobileVisualQuery.matches?'mobile':'desktop';}
+mobileVisualQuery.addEventListener('change',updateVisualViewportMode);
+window.addEventListener('resize',updateVisualViewportMode);
 let visualEditSession=null;
 function cleanVisualPreferences(value){const result={version:1,elements:{}};if(!value||typeof value!=='object')return result;for(const [key,v] of Object.entries(value.elements||{})){if(key!=='search'&&!key.startsWith('stock:'))continue;if(!v||typeof v!=='object')continue;const type=key==='search'?'search':'stock',r=visualPilotRegistry[type],p={};for(const [name,min,max] of [['width',r.min,r.max],['alpha',0,100],['spacing',0,32]])if(typeof v[name]==='number'&&Number.isFinite(v[name]))p[name]=Math.min(max,Math.max(min,v[name]));if(Object.keys(p).length)result.elements[key]=p}return result}
 function visualSelector(key){return key==='search'?'#main '+visualPilotRegistry.search.selector:'#main .free-stock-card[data-free-category='+JSON.stringify(key.slice(6))+']'}

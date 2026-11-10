@@ -2,7 +2,7 @@ const componentTools=window.BazarInterfaceComponents;
 const cleanBeforeComponents=cleanVisualPreferences;
 cleanVisualPreferences=function(value){const out=cleanBeforeComponents(value);if(value?.interfaceComponents)out.interfaceComponents=componentTools.clean(value.interfaceComponents);return out;};
 function componentPreferences(){return (visualEditSession?.draft||data.visualPreferences)?.interfaceComponents;}
-function componentMode(){return visualEditSession?.componentMode||((window.innerWidth||1280)<=700?'mobile':'desktop');}
+function componentMode(){return visualEditSession?.componentMode||visualViewportMode;}
 function componentSettings(keys){return componentTools.effective(componentPreferences(),keys,componentMode());}
 function componentDraft(){if(!visualEditSession)return null;return visualEditSession.draft.interfaceComponents??={version:1,elements:{},layout:{desktop:{},mobile:{}}};}
 function changeComponent(key,name,value){if(!visualEditSession)return;const p=componentDraft();p.elements[key]??={};p.elements[key][componentMode()]??={};p.elements[key][componentMode()][name]=value;if(name==='width')p.elements[key][componentMode()].autoWidth=false;visualEditSession.draft.interfaceComponents=componentTools.clean(p);applyVisualPreferences();}

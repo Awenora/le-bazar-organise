@@ -161,19 +161,50 @@ shoppingIngredientDialog=function(store){manualAddBeforeChoice(store);const fiel
 
 /* Text-only contrast repair: no backgrounds, decoration or table dimensions change. */
 
-function readableButtons(){for(const button of document.querySelectorAll('button')){if(button.matches('.calendar .meal')){button.classList.remove('bazar-light-button');continue;}let node=button,light=false;while(node&&node!==document.body){const color=getComputedStyle(node).backgroundColor,m=color.match(/[\d.]+/g);if(m&&m.length>=3&&(m.length<4||Number(m[3])>.12)){const brightness=(Number(m[0])*299+Number(m[1])*587+Number(m[2])*114)/1000;light=brightness>155;break;}node=node.parentElement;}button.classList.toggle('bazar-light-button',light);}}
+function applyButtonContrast(buttons){
+ const backgrounds=new WeakMap(),results=[];
+ function hasLightBackground(node){
+  if(!node||node===document.body)return false;
+  if(backgrounds.has(node))return backgrounds.get(node);
+  const channels=getComputedStyle(node).backgroundColor.match(/[\d.]+/g);
+  const opaque=channels&&channels.length>=3&&(channels.length<4||Number(channels[3])>.12);
+  const light=opaque?(Number(channels[0])*299+Number(channels[1])*587+Number(channels[2])*114)/1000>155:hasLightBackground(node.parentElement);
+  backgrounds.set(node,light);
+  return light;
+ }
+ // Read the computed backgrounds before changing any button classes.
+ for(const button of buttons)results.push([button,!button.matches('.calendar .meal')&&hasLightBackground(button)]);
+ for(const [button,light]of results)button.classList.toggle('bazar-light-button',light);
+}
 
-const modalBeforeUsability=modal;modal=function(html){modalBeforeUsability(html);readableButtons();};
+function readableButtons(root=document){applyButtonContrast(root.querySelectorAll('button'));}
+
+const modalBeforeUsability=modal;modal=function(html){modalBeforeUsability(html);readableButtons($('#dialog'));};
 
 const applyBeforeReadable=applyVisualPreferences;applyVisualPreferences=function(){applyBeforeReadable();readableButtons();};
 
-let readableQueued=false;new MutationObserver(()=>{if(readableQueued)return;readableQueued=true;queueMicrotask(()=>{readableQueued=false;readableButtons();});}).observe(document.body,{childList:true,subtree:true});
+new MutationObserver(records=>{
+ const buttons=new Set();
+ for(const record of records){
+  const target=record.target.closest?.('button');
+  if(target?.isConnected)buttons.add(target);
+  for(const node of record.addedNodes){
+   if(node.nodeType!==Node.ELEMENT_NODE||!node.isConnected)continue;
+   if(node.matches('button'))buttons.add(node);
+   for(const button of node.querySelectorAll('button'))buttons.add(button);
+  }
+ }
+ applyButtonContrast(buttons);
+}).observe(document.body,{childList:true,subtree:true});
 
 document.addEventListener('click',e=>{const menu=$('#coursesSecondaryMenu');if(menu?.open&&(!menu.contains(e.target)||e.target.closest('button')))menu.open=false;});
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=$('#coursesSecondaryMenu');if(menu)menu.open=false;}});
 
-document.addEventListener('pointerover',readableButtons);document.addEventListener('focusin',readableButtons);
+for(const type of ['pointerover','pointerout','focusin','focusout'])document.addEventListener(type,event=>{
+ const button=event.target.closest?.('button');
+ if(button)applyButtonContrast([button]);
+});
 
 if(page==='Courses')shopping();else readableButtons();
 

@@ -1,6 +1,6 @@
 /* Pilote uniquement sur Recettes : ordre DOM réel, jamais translate/position absolue des commandes. */
 const recipeGroupTools=window.BazarRecipeGroup,recipeGroupKey='recipe-toolbar-group';
-function recipeGroupMode(){return visualEditSession?.recipeGroupMode||((window.innerWidth||1280)<=700?'mobile':'desktop');}
+function recipeGroupMode(){return visualEditSession?.recipeGroupMode||visualViewportMode;}
 function recipeGroupPrefs(){return visualEditSession?.draft||data.visualPreferences||{};}
 function recipeGroupNodes(){return [...document.querySelectorAll('#catalog .recipe-layout-item')];}
 function recipeGroupIds(){const ids=recipeGroupNodes().map(el=>el.dataset.recipeLayoutItem);return [...['search','sort','categories','add'].filter(id=>ids.includes(id)),...quickFilterConfig().items.map(item=>'filter:'+item.id).filter(id=>ids.includes(id))];}

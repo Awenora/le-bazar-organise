@@ -1,6 +1,6 @@
 /* Correction limitée au catalogue du panneau À table ; aucune écriture métier. */
 const sideToolbarKey='side-recipe-toolbar',sideToolbarIds=['search','notebook','categories','filters'];
-function sideToolbarMode(){return visualEditSession?.sideToolbarMode||((window.innerWidth||1280)<=700?'mobile':'desktop');}
+function sideToolbarMode(){return visualEditSession?.sideToolbarMode||visualViewportMode;}
 function sideToolbarConfig(){const prefs=visualEditSession?.draft||data.visualPreferences||{};const p=recipeGroupTools.effective(prefs.sideRecipeToolbar,sideToolbarMode(),sideToolbarIds),raw=prefs.sideRecipeToolbar?.modes?.[sideToolbarMode()]||{};for(const key of ['gap','rowGap','bottomGap'])if(raw[key]===undefined)p[key]=6;return p;}
 const cleanBeforeSideToolbar=cleanVisualPreferences;
 cleanVisualPreferences=function(value){const result=cleanBeforeSideToolbar(value);if(value?.sideRecipeToolbar)result.sideRecipeToolbar=recipeGroupTools.clean(value.sideRecipeToolbar);return result;};

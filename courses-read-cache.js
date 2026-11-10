@@ -14,6 +14,7 @@
  const beforeLayout=applyCoursesFreeLayout;applyCoursesFreeLayout=function(...args){if(buildingCourses){layoutPending=true;return;}return beforeLayout.apply(this,args);};
  const beforeShopping=shopping;shopping=function(...args){if(visualEditSession)return phase(beforeShopping,this,args);buildingCourses++;try{return phase(beforeShopping,this,args);}finally{if(!--buildingCourses){if(applyPending){applyPending=groupsPending=layoutPending=false;applyVisualPreferences();}else{if(groupsPending){groupsPending=false;applySharedGroups();}if(layoutPending){layoutPending=false;applyCoursesFreeLayout();}}}}};
  const beforeApply=applyVisualPreferences;applyVisualPreferences=function(...args){if(buildingCourses){applyPending=true;return;}return phase(beforeApply,this,args);};
+ const beforeCaddie=coursesCaddieDialog;coursesCaddieDialog=function(...args){return phase(beforeCaddie,this,args);};
  const beforePending=coursePendingDialog;coursePendingDialog=function(...args){return phase(beforePending,this,args);};
  const beforeSave=save;save=function(...args){const frame=reads;reads=null;frame?.clear();familyShop.invalidateProductReadCache();stockTools.invalidateReadCache?.();try{return beforeSave.apply(this,args);}finally{reads=frame;familyShop.invalidateProductReadCache();stockTools.invalidateReadCache?.();}};
 })();
