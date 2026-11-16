@@ -5,10 +5,6 @@ const visualPilotRegistry={
  stock:{selector:'.free-stock-card[data-free-category]',label:'Tableau Stock',min:230,max:800,alpha:79,spacing:5}
 };
 // La largeur de la fenêtre sert aux aperçus, pas à autoriser la personnalisation.
-const phoneAppearanceLocked = navigator.userAgentData?.mobile === true
-  || /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent)
-  || (window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) <= 600);
-document.documentElement.classList.toggle('phone-appearance-locked', phoneAppearanceLocked);
 const mobileVisualQuery=window.matchMedia('(max-width: 700px)');
 let visualViewportMode=mobileVisualQuery.matches?'mobile':'desktop';
 function updateVisualViewportMode(){visualViewportMode=mobileVisualQuery.matches?'mobile':'desktop';}

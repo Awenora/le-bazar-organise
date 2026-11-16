@@ -98,17 +98,22 @@ function updateCourseCartNotice(wk){
 function rememberPhoneCoursePosition(removed){
  if(!phoneAppearanceLocked||page!=='Courses')return ()=>{};
  const board=$('#main .courses-board');
- if(!board?.scrollTop)return ()=>{};
+ if(!board)return ()=>{};
+ const collapsed=[...board.querySelectorAll('.courses-primary-category:not([open]),.courses-restock-store:not([open])')].map(group=>group.id).filter(Boolean);
  const bounds=board.getBoundingClientRect(),scrollTop=board.scrollTop;
  const visible=[...board.querySelectorAll('[data-cart-item]')].filter(row=>row!==removed&&!row.classList.contains('is-in-cart')).map(row=>[row,row.getBoundingClientRect()]).filter(([,rect])=>rect.height&&rect.bottom>bounds.top&&rect.top<bounds.bottom).sort((a,b)=>Number(a[1].top<bounds.top)-Number(b[1].top<bounds.top)||a[1].top-b[1].top);
- const anchors=visible.map(([row,rect])=>[row.dataset.cartItem,rect.top-bounds.top]);
+ const anchors=scrollTop?visible.map(([row,rect])=>[row.dataset.cartItem,rect.top]):[];
  return ()=>{
   const current=$('#main .courses-board');
-  if(!current||page!=='Courses')return;
+  if(!current||page!=='Courses'||current.dataset.courseWeek!==board.dataset.courseWeek)return;
+  if(current!==board)for(const id of collapsed){
+   const group=current.querySelector('#'+CSS.escape(id));
+   if(group)group.open=false;
+  }
   for(const [id,offset]of anchors){
    const row=current.querySelector('[data-cart-item='+CSS.escape(id)+']');
    if(!row?.getClientRects().length)continue;
-   current.scrollTop+=row.getBoundingClientRect().top-current.getBoundingClientRect().top-offset;
+   current.scrollTop+=row.getBoundingClientRect().top-Math.max(offset,current.getBoundingClientRect().top);
    return;
   }
   current.scrollTop=scrollTop;

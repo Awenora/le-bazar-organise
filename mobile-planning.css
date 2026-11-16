@@ -1,0 +1,90 @@
+/* Phone planning uses the existing weekly list and loads the month on demand. */
+body.planning-view #main > .phone-planning {
+ display: flex !important;
+ flex-direction: column;
+ height: auto !important;
+ min-height: 0 !important;
+ gap: 8px;
+}
+.phone-planning-nav {
+ display: flex;
+ gap: 5px;
+}
+.phone-planning-nav button {
+ flex: 1;
+ min-width: 0;
+ padding-inline: 4px;
+}
+.phone-planning-nav button[aria-pressed="true"] {
+ font-weight: 700;
+ box-shadow: inset 0 -2px #805230;
+}
+.phone-planning:not(.phone-planning-month) > .month-panel,
+.phone-planning-month > .side-panel,
+.phone-planning > .side-panel > .tabs {
+ display: none !important;
+}
+.phone-planning > .side-panel,
+.phone-planning > .month-panel {
+ width: 100% !important;
+ max-width: 100% !important;
+ box-sizing: border-box;
+ margin-inline: 0 !important;
+}
+.phone-planning > .side-panel {
+ height: auto !important;
+ min-height: 0 !important;
+}
+.phone-planning > .side-panel #side {
+ max-height: none !important;
+ overflow: visible !important;
+}
+.phone-planning-month #calendar {
+ height: auto !important;
+ min-width: 0 !important;
+ grid-template-rows: auto !important;
+ grid-auto-rows: minmax(64px, auto);
+ gap: 2px;
+}
+.phone-planning-month #calendar .weekday {
+ font-size: 10px;
+ padding: 3px 0;
+ overflow: hidden;
+}
+.phone-planning-month #calendar .day {
+ min-width: 0;
+ min-height: 64px;
+}
+.phone-planning-month #calendar .meal {
+ min-height: 22px !important;
+}
+.phone-planning-month #phoneMonthTitle {
+ margin: 0 34px 8px;
+ text-align: center;
+ font-size: 18px;
+}
+body.planning-view .phone-planning-month #calendar.calendar {
+ grid-template-rows: auto repeat(var(--rows), minmax(82px, auto)) !important;
+}
+.phone-planning-month #calendar .day .dayhead {
+ position: static;
+ flex: 0 0 auto;
+ padding: 0 2px;
+}
+.phone-planning-month #calendar .day .day-meals {
+ height: auto;
+}
+.phone-planning-month #calendar .day .meal-slot > .meal {
+ background: transparent !important;
+}
+body.planning-view .phone-planning-month #calendar .day .meal-slot .meal-title {
+ position: static !important;
+ padding: 1px 2px !important;
+ font-size: 10px !important;
+ color: #38281c !important;
+ background: none !important;
+ text-shadow: none !important;
+}
+.phone-planning-month #calendar :is(.photo-cook,.meal-period,.meal-remove,.drop-prompt) {
+ display: none !important;
+}

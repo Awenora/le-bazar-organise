@@ -132,6 +132,7 @@ try{
       if(bridge.syncing){bridge.syncAgain=true;return bridge.syncing;}
       bridge.syncing=(async()=>{
       try{
+        await initialMedia;
         const auth=await client.auth.getSession();
         if(!auth.data.session){bridge.authRequired=true;bridge.status='pending';bridge.tryApply?.();return;}
         bridge.authRequired=false;
@@ -185,13 +186,19 @@ try{
     return native.remove.call(this,k);
   };
   const media=new PrivateMedia(backend,()=>engine.view(),store,'bazar-cloud-media-map:'+household.id);bridge.media=media;
-  try{await media.initialize();}catch(e){bridge.lastError=e.message;}
   media.start();
+  const initialMedia=media.initialize().catch(error=>{bridge.lastError=error.message;});
   window.BAZAR_HAD_LOCAL_DATA=true;
-  for(const paused of document.querySelectorAll('script[data-cloud-src]')){
-    const script=document.createElement('script');script.src=paused.dataset.cloudSrc;
-    await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=()=>reject(Error('Impossible de charger '+script.src));document.body.append(script);});
-  }
+  const scripts=[...document.querySelectorAll('script[data-cloud-src]')];
+  // Ordered classic scripts can download together without changing execution order.
+  await Promise.all(scripts.map(paused=>new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.async=false;
+    script.src=paused.dataset.cloudSrc;
+    script.onload=resolve;
+    script.onerror=()=>reject(Error('Impossible de charger '+script.src));
+    document.body.append(script);
+  })));
   loaded=true;
   addEventListener('online',()=>bridge.sync());
   addEventListener('focus',()=>bridge.sync());
