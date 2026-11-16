@@ -1,5 +1,22 @@
 const pendingCartChanges=new Set();
 const phoneCartFeedbackDuration=850;
+const phoneCartCommits=[];
+let phoneCartCommitTimer;
+function commitNextPhoneCartChange(){
+ phoneCartCommitTimer=undefined;
+ const commit=phoneCartCommits.shift();
+ if(commit)commit();
+ if(phoneCartCommits.length)phoneCartCommitTimer=setTimeout(commitNextPhoneCartChange,32);
+}
+function queuePhoneCartCommit(commit){
+ phoneCartCommits.push(commit);
+ if(phoneCartCommitTimer===undefined)phoneCartCommitTimer=setTimeout(commitNextPhoneCartChange,220);
+}
+window.addEventListener('pagehide',()=>{
+ clearTimeout(phoneCartCommitTimer);
+ phoneCartCommitTimer=undefined;
+ for(const commit of phoneCartCommits.splice(0))commit();
+});
 let lastCartTap=null;
 let phoneCourseScrollTime=-Infinity;
 function phoneCoursesScrolling(){return performance.now()-phoneCourseScrollTime<300;}
@@ -14,6 +31,7 @@ document.addEventListener('click',event=>{
  const scope=input.hasAttribute('data-cart')?'list':'caddie';
  // A second tap at the same spot must not select the row that just moved there.
  if(lastCartTap&&lastCartTap.scope===scope&&lastCartTap.input!==input&&
+    (!phoneAppearanceLocked||scope==='caddie'||!lastCartTap.input.isConnected)&&
     event.timeStamp-lastCartTap.time<420&&
     Math.hypot(event.clientX-lastCartTap.x,event.clientY-lastCartTap.y)<20){
   event.preventDefault();
@@ -36,7 +54,7 @@ function changeCourseCart(input,wk,item,onSettled,keepDisabled=false){
  input.disabled=true;
  const row=input.closest('.courses-line');
  row?.classList.toggle('is-in-cart',desired);
- let completed=false;
+ let completed=false,fallback;
  const commit=()=>{
   if(completed)return;
   completed=true;
@@ -53,7 +71,8 @@ function changeCourseCart(input,wk,item,onSettled,keepDisabled=false){
   onSettled(saved);
  };
  // Paint the mobile checkmark before the synchronous save takes the main thread.
- const fallback=setTimeout(commit,keepDisabled?120:100);
+ if(keepDisabled){queuePhoneCartCommit(commit);return;}
+ fallback=setTimeout(commit,100);
  requestAnimationFrame(()=>requestAnimationFrame(commit));
 }
 let lastCartCheck=null;
