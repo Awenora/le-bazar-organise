@@ -24,9 +24,10 @@ if(typeof window.addEventListener==='function')window.addEventListener('resize',
 
 function applyGlobalTheme(){const bg=window.BAZAR_THEME?.months?.[month.getMonth()+1];document.body.style.backgroundImage=bg?'url('+JSON.stringify(bg)+')':'none';document.body.classList.toggle('image-month',!!bg);document.body.classList.toggle('october-view',month.getMonth()===9)}
 function render(){applyGlobalTheme();document.body.classList.toggle('planning-view',page==='À table !'); $('#globalNav').innerHTML=['À table !','Recettes','Courses','Réserves','Carnets'].map(n=>`<button class="${page===n?'active':''}" data-page="${n}" ${page===n?'aria-current="page"':''}>${n==='À table !'?'À TABLE !':n}</button>`).join('');$('#profile').innerHTML='<option value="">Choisir mon profil</option>'+people.map(([id,a])=>'<option value="'+esc(id)+'" '+(data.profile===id?'selected':'')+'>'+a+' '+esc(displayName(id))+'</option>').join('');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{if(b.dataset.page==='Historique'){historyPicker();return}page=b.dataset.page;query='';filter='Toutes';render()});if(page==='À table !')planning();else if(page==='Recettes')catalogPage();else if(page==='Carnets')notebooks();else if(page==='Courses')shopping();else if(page==='Réserves')reserves();else placeholder();}
-const phoneAppearanceLocked = navigator.userAgentData?.mobile === true
+const phoneAppearanceLocked = new URLSearchParams(location.search).get('affichage') === 'telephone'
+  || navigator.userAgentData?.mobile === true
   || /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent)
-  || (window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) <= 600);
+  || (navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) <= 600);
 document.documentElement.classList.toggle('phone-appearance-locked', phoneAppearanceLocked);
 let phonePlanningMonth=false;
 function setPhonePlanningView(nextTab,showMonth=false){
