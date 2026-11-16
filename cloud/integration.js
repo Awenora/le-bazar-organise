@@ -50,15 +50,17 @@
       $('#cloudLater').onclick=()=>{cloud.conflictMuted=true;$('#dialog').close();};return;
     }
     const next=cloud.engine.view();if(same(data,next))return;
+    const restoreCourses=rememberPhoneCoursePosition();
     const scroll=[...document.querySelectorAll('*')].filter(el=>el.scrollTop||el.scrollLeft).map(rememberScroll).filter(Boolean),generation=++scrollGeneration,interaction=scrollInteraction,viewPage=page,viewTab=tab;
     cloud.patch(data,next);cloud.applied(data);
     window.BazarAutomaticRestock?.invalidate?.();
     if(typeof budgetEmpty!=='undefined')budgetEmpty=null;
     render();
     restoreScroll(scroll);
+    restoreCourses();
     // Recipe-grid sizing finishes on animation frames. Restore once it has settled,
     // but never pull back a user who has started scrolling or changed page meanwhile.
-    const settled=()=>{if(generation===scrollGeneration&&interaction===scrollInteraction&&page===viewPage&&tab===viewTab)restoreScroll(scroll);};
+    const settled=()=>{if(generation===scrollGeneration&&interaction===scrollInteraction&&page===viewPage&&tab===viewTab){restoreScroll(scroll);restoreCourses();}};
     requestAnimationFrame(()=>{settled();requestAnimationFrame(settled);});
   };
   // Whole-database replacement breaks library revision protection even when
