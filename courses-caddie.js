@@ -1,4 +1,5 @@
 const pendingCartChanges=new Set();
+const phoneCartFeedbackDuration=850;
 let lastCartTap=null;
 let phoneCourseScrollTime=-Infinity;
 function phoneCoursesScrolling(){return performance.now()-phoneCourseScrollTime<300;}
@@ -51,12 +52,9 @@ function changeCourseCart(input,wk,item,onSettled,keepDisabled=false){
   }
   onSettled(saved);
  };
- // Give the browser a frame to show the checkmark before saving and rebuilding.
- const fallback=setTimeout(commit,100);
- requestAnimationFrame(()=>{
-  if(keepDisabled)setTimeout(commit,0);
-  else requestAnimationFrame(commit);
- });
+ // Paint the mobile checkmark before the synchronous save takes the main thread.
+ const fallback=setTimeout(commit,keepDisabled?120:100);
+ requestAnimationFrame(()=>requestAnimationFrame(commit));
 }
 let lastCartCheck=null;
 const courseCartRefreshBoards=new WeakSet();
@@ -171,7 +169,7 @@ function updatePhoneCartSummary(wk,items,board){
 function checkCourseListItem(input,wk,item,items){
  const row=input.closest('.courses-line');
  const keepVisible=phoneAppearanceLocked&&row;
- const removeAt=performance.now()+500;
+ const removeAt=performance.now()+phoneCartFeedbackDuration;
  changeCourseCart(input,wk,item,saved=>{
   if(saved)lastCartCheck={week:wk,item};
   if(page!=='Courses'||datekey(coursesWeek())!==wk)return;
