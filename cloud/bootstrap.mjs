@@ -1,5 +1,6 @@
 import {config} from './config.mjs';
 import {CloudEngine} from './engine.mjs';
+import {equal} from './records.mjs';
 import {createBackend} from './backend.mjs?v=loading-20261102-1';
 import {PrivateMedia} from './media.mjs?v=avatar-reference-20261110-1';
 import {encodeCache,decodeCache} from './cache-codec.mjs';
@@ -126,6 +127,7 @@ try{
       return true;
     },
     status:'local',
+    sameData:equal,
     reconnect:login,
     importRecipeByLink:url=>importRecipeByLink(client,url),
     async sync(){
@@ -163,6 +165,7 @@ try{
       try{await bridge.syncing;}finally{bridge.syncing=null;if(bridge.syncAgain){bridge.syncAgain=false;queueMicrotask(()=>bridge.sync());}}
     },
   };
+  let courseSyncTimer;
   const routed=new Set(['bazar-organise-v1','bazar-courses-undo','bazar-stock-last-undo-v1','bazar-organise-before-inventory-1','bazar-organise-before-packs-2']);
   const namespace=k=>'bazar-cloud-local:'+household.id+':'+k;
   Storage.prototype.getItem=function(k){
@@ -174,7 +177,13 @@ try{
     if(this!==localStorage||!routed.has(k))return native.set.call(this,k,value);
     if(k==='bazar-organise-v1'){
       const next=JSON.parse(value);engine.edit(uiSnapshot,next,{page:bridge.currentPage?.(),checkpoint:!!bridge.restoring});const location=next.visualPreferences?.stockRoomTables?.view?.locationId;if(typeof location==='string'&&location)native.set.call(localStorage,stockLocationKey,location);else native.remove.call(localStorage,stockLocationKey);if(next.notebookLayout)native.set.call(localStorage,notebookLayoutKey,JSON.stringify(next.notebookLayout));else native.remove.call(localStorage,notebookLayoutKey);uiSnapshot=structuredClone(next);
-      if(loaded)queueMicrotask(()=>bridge.sync());return;
+      if(loaded){
+        if(phoneAppearanceLocked&&bridge.currentPage?.()==='Courses'){
+          clearTimeout(courseSyncTimer);
+          courseSyncTimer=setTimeout(()=>bridge.sync(),350);
+        }else queueMicrotask(()=>bridge.sync());
+      }
+      return;
     }
     return native.set.call(this,namespace(k),value);
   };

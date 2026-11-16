@@ -6,7 +6,7 @@
     const keys=Object.keys(a);
     return keys.length===Object.keys(b).length&&keys.every(key=>Object.hasOwn(b,key)&&JSON.stringify(a[key])===JSON.stringify(b[key]));
   }
-  let menuRefreshDeferred=false;
+  let menuRefreshDeferred=false,courseRefreshTimer;
   function recipeMenuOpen(){
     const targeted=page==='Carnets'||page==='Recettes'||(page==='À table !'&&tab==='Recettes');
     return document.querySelector('#courseDestinationChoice')||(targeted&&document.querySelector('#sideNotebookMenu,.bazar-action-menu'));
@@ -49,7 +49,13 @@
       $('#cloudRemote').onclick=()=>{exportLocal();cloud.engine.resolve('remote');$('#dialog').close();cloud.sync();};
       $('#cloudLater').onclick=()=>{cloud.conflictMuted=true;$('#dialog').close();};return;
     }
-    const next=cloud.engine.view();if(same(data,next))return;
+    const mobileCourses=phoneAppearanceLocked&&page==='Courses';
+    if(mobileCourses&&phoneCoursesScrolling()){
+      clearTimeout(courseRefreshTimer);
+      courseRefreshTimer=setTimeout(()=>cloud.tryApply(),320);
+      return;
+    }
+    const next=cloud.engine.view();if(same(data,next)||(mobileCourses&&cloud.sameData(data,next)))return;
     const restoreCourses=rememberPhoneCoursePosition();
     const scroll=[...document.querySelectorAll('*')].filter(el=>el.scrollTop||el.scrollLeft).map(rememberScroll).filter(Boolean),generation=++scrollGeneration,interaction=scrollInteraction,viewPage=page,viewTab=tab;
     cloud.patch(data,next);cloud.applied(data);
@@ -58,6 +64,7 @@
     render();
     restoreScroll(scroll);
     restoreCourses();
+    if(mobileCourses)return;
     // Recipe-grid sizing finishes on animation frames. Restore once it has settled,
     // but never pull back a user who has started scrolling or changed page meanwhile.
     const settled=()=>{if(generation===scrollGeneration&&interaction===scrollInteraction&&page===viewPage&&tab===viewTab){restoreScroll(scroll);restoreCourses();}};
