@@ -58,11 +58,56 @@ for(let i=0;i<offset;i++)html+='<div class="outside" aria-hidden="true"></div>';
 for(let day=1;day<=count;day++){let d=new Date(month.getFullYear(),month.getMonth(),day),k=datekey(d),p=data.plans[k]||{};html+=`<div class="day ${p.soir?'split-day':''} ${k===datekey(today)?'current':''} ${d>=week&&d<add(week,7)?'thisweek':''}" data-drop="${k}"><div class="dayhead"><b ${k===datekey(today)?'aria-current="date"':''}>${day}</b></div><div class="day-meals">${dayMeal(k,'midi',p.midi)}${p.soir?dayMeal(k,'soir',p.soir):''}</div>${!p.soir?`<button class="evening" data-add-evening="${k}" aria-label="Ajouter un emplacement pour le soir du ${day}">＋</button>`:''}</div>`}
 for(let i=offset+count;i<rows*7;i++)html+='<div class="outside" aria-hidden="true"></div>';
 let cal=$('#calendar');if(phoneAppearanceLocked){let title=$('#phoneMonthTitle');if(!title){title=document.createElement('h2');title.id='phoneMonthTitle';cal.before(title);}title.textContent=fmt(month,{month:'long',year:'numeric'});}cal.innerHTML=html;cal.style.setProperty('--rows',rows);cal.style.gridTemplateRows='28px '+weights.join(' ');cal.style.backgroundImage='none';cal.dataset.month=String(month.getMonth()+1);cal.setAttribute('aria-label',fmt(month,{month:'long',year:'numeric'}));bindEdits(cal);
+cal.querySelectorAll('[data-month-recipe]').forEach(button=>button.onclick=()=>openMonthlyRecipe(...button.dataset.monthRecipe.split('|')));
+cal.querySelectorAll('[data-month-cook]').forEach(button=>button.onclick=()=>chooseMonthlyCook(...button.dataset.monthCook.split('|')));
 document.querySelectorAll('[data-add-evening]').forEach(b=>b.onclick=()=>addEvening(b.dataset.addEvening));document.querySelectorAll('[data-remove-evening]').forEach(b=>b.onclick=()=>{let k=b.dataset.removeEvening;if(data.plans[k]?.soir?.recipeId){editMeal(k,'soir');return}delete data.plans[k].soir;save();render()});document.querySelectorAll('[data-move-day]').forEach(b=>b.onclick=()=>moveDayDialog(b.dataset.moveDay));
 }
 function addEvening(k){data.plans[k]??={};if(!data.plans[k].soir)data.plans[k].soir={recipeId:null,cook:cook(k),participants:[],note:''};save();render()}
 
-function dayMeal(k,slot,m){let r=recipe(m?.recipeId),label=slot==='midi'?'Midi':'Soir';return `<div class="meal-slot ${r?'has-recipe':'vacant'} ${slot==='soir'?'supper':''}" data-target="${k}|${slot}">${r?`<button type="button" class="remove-cross meal-remove" data-remove-meal="${k}|${slot}" aria-label="Retirer ce repas du planning" title="Retirer du planning">×</button><button class="meal" draggable="true" data-move="${k}|${slot}" data-edit="${k}|${slot}" aria-label="${label} : ${esc(r.name)}. Modifier">${phoneAppearanceLocked?'':`<img src="${esc(r.photo)}" alt="">`}<span class="meal-period">${label}</span><strong class="meal-title">${esc(r.name)}</strong></button><button class="photo-cook" data-edit="${k}|${slot}" title="Modifier le cuisinier" aria-label="Cuisinier : ${esc(displayName(m.cook))}. Modifier"><span>${avatar(m.cook)}</span><small>${esc(displayName(m.cook))}</small></button>`:`<button class="emptyday" data-edit="${k}|${slot}"><span class="meal-period">${label}</span><span class="drop-prompt">Glisser une recette<br>ou cliquer</span></button>`}${slot==='soir'&&!r?`<button class="remove-evening" data-remove-evening="${k}" aria-label="Retirer l’emplacement du soir">×</button>`:''}</div>`}
+function dayMeal(k,slot,m){let r=recipe(m?.recipeId),label=slot==='midi'?'Midi':'Soir';return `<div class="meal-slot ${r?'has-recipe':'vacant'} ${slot==='soir'?'supper':''}" data-target="${k}|${slot}">${r?`<button type="button" class="remove-cross meal-remove" data-remove-meal="${k}|${slot}" aria-label="Retirer ce repas du planning" title="Retirer du planning">×</button><button class="meal" draggable="true" data-move="${k}|${slot}" data-month-recipe="${k}|${slot}" aria-label="${label} : ${esc(r.name)}. Ouvrir la recette">${phoneAppearanceLocked?'':`<img src="${esc(r.photo)}" alt="">`}<span class="meal-period">${label}</span><strong class="meal-title">${esc(r.name)}</strong></button><button class="photo-cook" data-month-cook="${k}|${slot}" title="Changer le cuisinier" aria-label="Cuisinier : ${esc(displayName(m.cook))}. Modifier"><span>${avatar(m.cook)}</span><small>${esc(displayName(m.cook))}</small></button>`:`<button class="emptyday" data-edit="${k}|${slot}"><span class="meal-period">${label}</span><span class="drop-prompt">Glisser une recette<br>ou cliquer</span></button>`}${slot==='soir'&&!r?`<button class="remove-evening" data-remove-evening="${k}" aria-label="Retirer l’emplacement du soir">×</button>`:''}</div>`}
+
+function openMonthlyRecipe(date,slot){
+ const meal=data.plans[date]?.[slot];
+ if(!recipe(meal?.recipeId))return;
+ openRecipe(meal.recipeId);
+ const actions=document.createElement('div');
+ actions.className='actions';
+ for(const [label,run]of [
+  ['Changer le cuisinier',()=>chooseMonthlyCook(date,slot)],
+  ['Modifier le repas prévu',()=>editMeal(date,slot)]
+ ]){
+  const button=document.createElement('button');
+  button.type='button';
+  button.textContent=label;
+  button.onclick=run;
+  actions.append(button);
+ }
+ const dialog=$('#dialog');
+ const commands=dialog.querySelector('.rs-primary-actions')||dialog.querySelector('#editRecipe')?.closest('.actions');
+ if(commands)commands.after(actions);
+ else dialog.append(actions);
+}
+
+function chooseMonthlyCook(date,slot){
+ const meal=data.plans[date]?.[slot];
+ if(!recipe(meal?.recipeId))return;
+ modal('<h2>Qui cuisine ?</h2><div class="actions">'+people.map(([id])=>
+  '<button type="button" data-month-cook-choice="'+esc(id)+'" aria-pressed="'+(meal.cook===id)+'">'+avatar(id)+' '+esc(displayName(id))+'</button>'
+ ).join('')+'</div>');
+ $('#dialog').querySelectorAll('[data-month-cook-choice]').forEach(button=>button.onclick=()=>{
+  const selected=button.dataset.monthCookChoice;
+  if(data.plans[date]?.[slot]!==meal)return;
+  if(selected!==meal.cook){
+   const previous=meal.cook;
+   meal.cook=selected;
+   if(!save()){meal.cook=previous;return;}
+   const top=$('#main').scrollTop;
+   $('#dialog').close();
+   render();
+   $('#main').scrollTop=top;
+  }else $('#dialog').close();
+ });
+}
 
 function bindEdits(el){el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editMeal(...b.dataset.edit.split('|')))}
 function weekly(){
