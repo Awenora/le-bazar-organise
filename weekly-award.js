@@ -23,7 +23,8 @@ cleanVisualPreferences=function(raw){const out=weeklyAwardCleanBefore(raw);if(ra
 const weeklyAwardBox=document.createElement('section');weeklyAwardBox.id='weeklyRecipeAward';weeklyAwardBox.hidden=true;weeklyAwardBox.setAttribute('aria-label','Recette de la semaine');weeklyAwardBox.dataset.siteVisualKey='weekly-recipe-award';document.body.append(weeklyAwardBox);
 const weeklyAwardCSS=document.createElement('style');weeklyAwardCSS.textContent=`
 #weeklyRecipeAward{position:fixed;z-index:7;box-sizing:border-box;overflow:hidden;border:1px solid #b99b7180;box-shadow:0 3px 8px #4b2d1426;font-family:'Segoe UI',Arial,sans-serif;line-height:1.2}
-#weeklyRecipeAward.wa-in-catalog{position:relative;left:auto!important;top:auto!important;flex:0 0 auto;max-width:100%;margin-top:8px}
+#weeklyRecipeAward.wa-below-phone-panel{position:relative;left:auto!important;top:auto!important;flex:0 0 auto;max-width:100%}
+.planning-view .side-panel:has(>#side.catalog-side){max-height:var(--catalog-panel-height,none)}
 #weeklyRecipeAward[hidden]{display:none!important;pointer-events:none!important}
 #weeklyRecipeAward .wa-tie{font-size:1.15em;line-height:1.1;font-weight:700;margin:0 0 5px;color:inherit}
 #weeklyRecipeAward .wa-list{height:100%;overflow:hidden}
@@ -81,21 +82,26 @@ function refreshWeeklyAward(){
  const side=document.querySelector('.planning-view .side-panel'),list=side?.querySelector('.week-list');
  const catalog=side?.querySelector('#side.catalog-side');
  const inCatalog=!!catalog;
- weeklyAwardBox.classList.toggle('wa-in-catalog',inCatalog);
- if(inCatalog&&weeklyAwardBox.parentElement!==side){
-  if(phoneAppearanceLocked)catalog.before(weeklyAwardBox);
-  else side.append(weeklyAwardBox);
- }else if(!inCatalog&&weeklyAwardBox.parentElement!==document.body)document.body.append(weeklyAwardBox);
+ const belowPhonePanel=phoneAppearanceLocked&&!!catalog;
+ weeklyAwardBox.classList.toggle('wa-below-phone-panel',belowPhonePanel);
+ if(belowPhonePanel){
+  if(side.nextElementSibling!==weeklyAwardBox)side.after(weeklyAwardBox);
+ }else if(weeklyAwardBox.parentElement!==document.body)document.body.append(weeklyAwardBox);
  if(!side?.getClientRects().length||(!list&&!catalog)){weeklyAwardBox.hidden=true;return;}
  archiveFinishedWeeklyAwards();
- const prefs=weeklyAwardPreferences(),panel=side.getBoundingClientRect(),last=list?.querySelectorAll('.weekrow');
- const lastRow=last?.[last.length-1]?.getBoundingClientRect();;
- if(prefs.hidden||(!inCatalog&&!lastRow)){weeklyAwardBox.hidden=true;return;}
- const insideTop=lastRow?lastRow.bottom+8:0,insideSpace=Math.min(panel.bottom-10,innerHeight-8)-insideTop,outsideTop=panel.bottom+8,outsideSpace=innerHeight-8-outsideTop,outside=insideSpace<90&&outsideSpace>insideSpace;
- const top=inCatalog?0:outside?outsideTop:insideTop,maxBottom=outside?innerHeight-8:Math.min(panel.bottom-10,innerHeight-8);
- const available=inCatalog?Math.max(44,Math.min(prefs.height,innerHeight*.25)):maxBottom-top,maxWidth=Math.max(0,Math.min(panel.width,innerWidth-panel.left));
+ const prefs=weeklyAwardPreferences(),lastRow=list?.querySelector('.weekrow:last-of-type')?.getBoundingClientRect();
+ if(prefs.hidden||(!inCatalog&&!lastRow)){side.style.removeProperty('--catalog-panel-height');weeklyAwardBox.hidden=true;return;}
+ if(inCatalog&&!belowPhonePanel){
+  const panelTop=side.getBoundingClientRect().top;
+  side.style.setProperty('--catalog-panel-height',Math.max(0,innerHeight-panelTop-60)+'px');
+ }
+ const panel=side.getBoundingClientRect(),insideTop=lastRow?lastRow.bottom+8:0;
+ const insideSpace=Math.min(panel.bottom-10,innerHeight-8)-insideTop,outsideTop=panel.bottom+8,outsideSpace=innerHeight-8-outsideTop;
+ const outside=inCatalog||(insideSpace<90&&outsideSpace>insideSpace);
+ const top=outside?outsideTop:insideTop,maxBottom=outside?innerHeight-8:Math.min(panel.bottom-10,innerHeight-8);
+ const available=belowPhonePanel?prefs.height:maxBottom-top,maxWidth=Math.max(0,Math.min(panel.width,innerWidth-panel.left));
  if(available<44||maxWidth<140){weeklyAwardBox.hidden=true;return;}
- const width=inCatalog?'100%':maxWidth+'px',height=Math.min(prefs.height,available),left=panel.left,y=Math.min(prefs.y,Math.max(0,available-height));
+ const width=belowPhonePanel?'100%':maxWidth+'px',height=Math.min(prefs.height,available),left=panel.left,y=Math.min(prefs.y,Math.max(0,available-height));
  const rgb=[1,3,5].map(i=>parseInt(prefs.background.slice(i,i+2),16));Object.assign(weeklyAwardBox.style,{left:left+'px',top:(top+y)+'px',width,height:height+'px',padding:prefs.spacing+'px',fontFamily:prefs.fontFamily,fontSize:prefs.fontSize+'px',color:prefs.color,background:'rgba('+rgb.join(',')+','+prefs.alpha/100+')',borderRadius:prefs.radius+'px'});
  const result=weeklyAwardResult(week),ties=result.winners.length>1;weeklyAwardBox.style.setProperty('--wa-columns','2');weeklyAwardBox.style.setProperty('--wa-rows',String(Math.ceil(result.winners.length/2)));weeklyAwardBox.classList.toggle('wa-tied',ties);weeklyAwardBox.classList.toggle('wa-small',height<110);weeklyAwardBox.hidden=false;
  const html=result.winners.length?(ties?'<p class="wa-tie">'+esc(prefs.title)+' · Ex æquo</p>':'')+'<div class="wa-list">'+result.winners.map(w=>{const r=recipe(w.recipeId),photo=w.photo||r?.photo||'',cooks=w.cooks||[];return '<button type="button" class="wa-recipe" data-award-recipe="'+esc(w.recipeId)+'" aria-label="Voir '+esc(w.name)+'"><span class="wa-photo">'+(photo?'<img src="'+esc(photo)+'" alt="">':'')+'</span><span class="wa-copy"><strong class="wa-award-title">'+esc(prefs.title)+'</strong><span class="wa-name">'+esc(w.name)+'</span>'+(cooks.length?'<span class="wa-proposer">'+cooks.map(person=>'<span class="wa-person"><span class="wa-faces wa-royal-avatar">'+avatar(person)+'<span class="wa-crown" aria-hidden="true">'+weeklyAwardCrown()+'</span></span><span class="wa-person-name">'+esc(displayName(person))+'</span></span>').join('')+'</span>':'')+'</span></button>';}).join('')+'</div>':'<div class="wa-wait"><strong>'+esc(prefs.title)+'</strong><span>Aucun vote pour le moment</span></div>';
