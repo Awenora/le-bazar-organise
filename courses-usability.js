@@ -177,13 +177,23 @@ function applyButtonContrast(buttons){
  for(const [button,light]of results)button.classList.toggle('bazar-light-button',light);
 }
 
-function readableButtons(root=document){applyButtonContrast(root.querySelectorAll('button'));}
+let fullButtonContrastPending=false;
+function readableButtons(root=document){
+ if(root!==document){applyButtonContrast(root.querySelectorAll('button'));return;}
+ if(fullButtonContrastPending)return;
+ fullButtonContrastPending=true;
+ queueMicrotask(()=>{
+  fullButtonContrastPending=false;
+  applyButtonContrast(document.querySelectorAll('button'));
+ });
+}
 
 const modalBeforeUsability=modal;modal=function(html){modalBeforeUsability(html);readableButtons($('#dialog'));};
 
 const applyBeforeReadable=applyVisualPreferences;applyVisualPreferences=function(){applyBeforeReadable();readableButtons();};
 
 new MutationObserver(records=>{
+ if(fullButtonContrastPending)return;
  const buttons=new Set();
  for(const record of records){
   const target=record.target.closest?.('button');
