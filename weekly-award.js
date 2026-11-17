@@ -23,6 +23,7 @@ cleanVisualPreferences=function(raw){const out=weeklyAwardCleanBefore(raw);if(ra
 const weeklyAwardBox=document.createElement('section');weeklyAwardBox.id='weeklyRecipeAward';weeklyAwardBox.hidden=true;weeklyAwardBox.setAttribute('aria-label','Recette de la semaine');weeklyAwardBox.dataset.siteVisualKey='weekly-recipe-award';document.body.append(weeklyAwardBox);
 const weeklyAwardCSS=document.createElement('style');weeklyAwardCSS.textContent=`
 #weeklyRecipeAward{position:fixed;z-index:7;box-sizing:border-box;overflow:hidden;border:1px solid #b99b7180;box-shadow:0 3px 8px #4b2d1426;font-family:'Segoe UI',Arial,sans-serif;line-height:1.2}
+#weeklyRecipeAward.wa-in-catalog{position:relative;left:auto!important;top:auto!important;flex:0 0 auto;max-width:100%;margin-top:8px}
 #weeklyRecipeAward[hidden]{display:none!important;pointer-events:none!important}
 #weeklyRecipeAward .wa-tie{font-size:1.15em;line-height:1.1;font-weight:700;margin:0 0 5px;color:inherit}
 #weeklyRecipeAward .wa-list{height:100%;overflow:hidden}
@@ -75,18 +76,30 @@ const weeklyAwardCSS=document.createElement('style');weeklyAwardCSS.textContent=
 `;document.head.append(weeklyAwardCSS);
 function weeklyAwardCrown(){return '<svg viewBox="0 0 64 54" aria-hidden="true" focusable="false" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="wa-gold" x1="8" y1="10" x2="52" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#fff0af"/><stop offset=".34" stop-color="#e8b94f"/><stop offset=".7" stop-color="#c88d2d"/><stop offset="1" stop-color="#f4ce72"/></linearGradient></defs><path d="M9 17Q16 21 24 27L30 10Q32 5 35 10L41 27Q48 21 56 16L51 41Q33 48 14 41Z" fill="url(#wa-gold)" stroke="#805327" stroke-width="2" stroke-linejoin="round"/><path d="M14 37Q32 43 52 36L51 44Q32 51 15 44Z" fill="#e5b34e" stroke="#805327" stroke-width="2"/><path d="M17 39Q33 44 49 38" stroke="#fff1b7" stroke-width="1.8" stroke-linecap="round"/><g fill="#f6d581" stroke="#805327" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><circle cx="32" cy="8" r="4.5"/><circle cx="57" cy="14" r="4"/></g><path d="M32 25L36 30L32 35L28 30Z" fill="#9c632c" stroke="#fff0b0" stroke-width="1"/><path d="M16 23L19 31M29 18L27 24" stroke="#fff0ae" stroke-width="2" stroke-linecap="round"/></svg>';}
 
+let weeklyAwardMarkup;
 function refreshWeeklyAward(){
- const side=document.querySelector('.planning-view .side-panel'),list=document.querySelector('#side .week-list');
- if(!side||!list){weeklyAwardBox.hidden=true;return;}
- archiveFinishedWeeklyAwards();const prefs=weeklyAwardPreferences(),panel=side.getBoundingClientRect(),rows=[...list.querySelectorAll('.weekrow')],last=rows.at(-1)?.getBoundingClientRect();
- if(!last||prefs.hidden){weeklyAwardBox.hidden=true;return;}
- const insideTop=last.bottom+8,insideSpace=Math.min(panel.bottom-10,innerHeight-8)-insideTop,outsideTop=panel.bottom+8,outsideSpace=innerHeight-8-outsideTop,outside=insideSpace<90&&outsideSpace>insideSpace,top=outside?outsideTop:insideTop,maxBottom=outside?innerHeight-8:Math.min(panel.bottom-10,innerHeight-8),available=maxBottom-top,maxWidth=Math.max(0,Math.min(panel.width,innerWidth-panel.left));
+ const side=document.querySelector('.planning-view .side-panel'),list=side?.querySelector('.week-list');
+ const catalog=side?.querySelector('#side.catalog-side');
+ const inCatalog=!!catalog;
+ weeklyAwardBox.classList.toggle('wa-in-catalog',inCatalog);
+ if(inCatalog&&weeklyAwardBox.parentElement!==side){
+  if(phoneAppearanceLocked)catalog.before(weeklyAwardBox);
+  else side.append(weeklyAwardBox);
+ }else if(!inCatalog&&weeklyAwardBox.parentElement!==document.body)document.body.append(weeklyAwardBox);
+ if(!side?.getClientRects().length||(!list&&!catalog)){weeklyAwardBox.hidden=true;return;}
+ archiveFinishedWeeklyAwards();
+ const prefs=weeklyAwardPreferences(),panel=side.getBoundingClientRect(),last=list?.querySelectorAll('.weekrow');
+ const lastRow=last?.[last.length-1]?.getBoundingClientRect();;
+ if(prefs.hidden||(!inCatalog&&!lastRow)){weeklyAwardBox.hidden=true;return;}
+ const insideTop=lastRow?lastRow.bottom+8:0,insideSpace=Math.min(panel.bottom-10,innerHeight-8)-insideTop,outsideTop=panel.bottom+8,outsideSpace=innerHeight-8-outsideTop,outside=insideSpace<90&&outsideSpace>insideSpace;
+ const top=inCatalog?0:outside?outsideTop:insideTop,maxBottom=outside?innerHeight-8:Math.min(panel.bottom-10,innerHeight-8);
+ const available=inCatalog?Math.max(44,Math.min(prefs.height,innerHeight*.25)):maxBottom-top,maxWidth=Math.max(0,Math.min(panel.width,innerWidth-panel.left));
  if(available<44||maxWidth<140){weeklyAwardBox.hidden=true;return;}
- const width=maxWidth,height=Math.min(prefs.height,available),left=panel.left,y=Math.min(prefs.y,Math.max(0,available-height));
- const rgb=[1,3,5].map(i=>parseInt(prefs.background.slice(i,i+2),16));Object.assign(weeklyAwardBox.style,{left:left+'px',top:(top+y)+'px',width:width+'px',height:height+'px',padding:prefs.spacing+'px',fontFamily:prefs.fontFamily,fontSize:prefs.fontSize+'px',color:prefs.color,background:'rgba('+rgb.join(',')+','+prefs.alpha/100+')',borderRadius:prefs.radius+'px'});
+ const width=inCatalog?'100%':maxWidth+'px',height=Math.min(prefs.height,available),left=panel.left,y=Math.min(prefs.y,Math.max(0,available-height));
+ const rgb=[1,3,5].map(i=>parseInt(prefs.background.slice(i,i+2),16));Object.assign(weeklyAwardBox.style,{left:left+'px',top:(top+y)+'px',width,height:height+'px',padding:prefs.spacing+'px',fontFamily:prefs.fontFamily,fontSize:prefs.fontSize+'px',color:prefs.color,background:'rgba('+rgb.join(',')+','+prefs.alpha/100+')',borderRadius:prefs.radius+'px'});
  const result=weeklyAwardResult(week),ties=result.winners.length>1;weeklyAwardBox.style.setProperty('--wa-columns','2');weeklyAwardBox.style.setProperty('--wa-rows',String(Math.ceil(result.winners.length/2)));weeklyAwardBox.classList.toggle('wa-tied',ties);weeklyAwardBox.classList.toggle('wa-small',height<110);weeklyAwardBox.hidden=false;
  const html=result.winners.length?(ties?'<p class="wa-tie">'+esc(prefs.title)+' · Ex æquo</p>':'')+'<div class="wa-list">'+result.winners.map(w=>{const r=recipe(w.recipeId),photo=w.photo||r?.photo||'',cooks=w.cooks||[];return '<button type="button" class="wa-recipe" data-award-recipe="'+esc(w.recipeId)+'" aria-label="Voir '+esc(w.name)+'"><span class="wa-photo">'+(photo?'<img src="'+esc(photo)+'" alt="">':'')+'</span><span class="wa-copy"><strong class="wa-award-title">'+esc(prefs.title)+'</strong><span class="wa-name">'+esc(w.name)+'</span>'+(cooks.length?'<span class="wa-proposer">'+cooks.map(person=>'<span class="wa-person"><span class="wa-faces wa-royal-avatar">'+avatar(person)+'<span class="wa-crown" aria-hidden="true">'+weeklyAwardCrown()+'</span></span><span class="wa-person-name">'+esc(displayName(person))+'</span></span>').join('')+'</span>':'')+'</span></button>';}).join('')+'</div>':'<div class="wa-wait"><strong>'+esc(prefs.title)+'</strong><span>Aucun vote pour le moment</span></div>';
- if(weeklyAwardBox.innerHTML!==html){weeklyAwardBox.innerHTML=html;weeklyAwardBox.querySelectorAll('[data-award-recipe]').forEach(b=>b.onclick=()=>{if(!visualEditSession&&recipe(b.dataset.awardRecipe))openRecipe(b.dataset.awardRecipe);});}
+ if(weeklyAwardMarkup!==html){weeklyAwardMarkup=html;weeklyAwardBox.innerHTML=html;weeklyAwardBox.querySelectorAll('[data-award-recipe]').forEach(b=>b.onclick=()=>{if(!visualEditSession&&recipe(b.dataset.awardRecipe))openRecipe(b.dataset.awardRecipe);});}
 }
 let weeklyAwardFrame=0;
 function scheduleWeeklyAward(){if(weeklyAwardFrame)return;weeklyAwardFrame=requestAnimationFrame(()=>{weeklyAwardFrame=0;refreshWeeklyAward();});}

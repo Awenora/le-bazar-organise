@@ -58,7 +58,7 @@
 .planning-view .calendar .day .meal-slot.vacant.supper{box-shadow:none}
 .planning-view .calendar .day .meal-slot.vacant.supper::before{content:none}
 
-#side.weekly-side .weekrow.week-current{outline:none!important}
+#side.weekly-side .weekrow.week-current{outline:1px solid #b88d66!important;outline-offset:-1px;border-radius:8px}
 #side.weekly-side .weekrow.week-current>.date{background:rgba(255,246,228,.72)!important;color:#412f23!important;border:1px solid #eddbbf70!important;border-radius:5px!important}
 
 #side .side-compact-controls>.recipe-category-tabs{flex-wrap:wrap!important;overflow:visible!important}
