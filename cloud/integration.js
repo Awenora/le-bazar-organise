@@ -16,7 +16,7 @@
   }
   function busy(){
     const menu=recipeMenuOpen();if(menu)menuRefreshDeferred=true;
-    return cloud.cartSelectionsPending||menu||document.querySelector('#dialog')?.open||
+    return menu||document.querySelector('#dialog')?.open||
     (typeof visualEditSession!=='undefined'&&visualEditSession)||
     (typeof courseTouchGesture!=='undefined'&&courseTouchGesture)||
     (phoneAppearanceLocked&&page==='Courses'&&document.querySelector('.courses-line.is-in-cart input[data-cart]:disabled'))||
