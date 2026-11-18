@@ -179,6 +179,7 @@ function checkCourseListItem(input,wk,item,items){
    const remaining=$('#main .courses-remaining');
    if(remaining)remaining.textContent=count.remaining+' article'+(count.remaining!==1?'s':'')+' restant'+(count.remaining!==1?'s':'');
    if(count.remaining)$('#main .courses-list-empty')?.remove();
+   window.updateCourseCheckout?.(items,wk);
 
   }
   window.BazarCloud?.tryApply?.();
