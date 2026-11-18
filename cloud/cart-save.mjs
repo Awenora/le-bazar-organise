@@ -5,8 +5,12 @@ function overlay(view,values){const result={...view};for(const key of fields){de
 export function createCartSaver({engine,storageKey,native,onSaved,onIdle,onError}){
  const key='bazar-cart-journal:'+storageKey;
  let entries=JSON.parse(native.get.call(localStorage,key)||'[]'),worker=null,timer,inFlight=null,failed=false,stopped=false;
- addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);worker?.terminate();worker=null;inFlight=null;});
- addEventListener('pageshow',event=>{if(event.persisted&&stopped)location.reload();});
+ let watching=false;
+ function watch(){
+  if(watching)return;watching=true;
+  addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);worker?.terminate();worker=null;inFlight=null;});
+  addEventListener('pageshow',event=>{if(event.persisted&&stopped)location.reload();});
+ }
  const write=next=>{if(next.length)native.set.call(localStorage,key,JSON.stringify(next));else native.remove.call(localStorage,key);};
  function recover(){
   for(const entry of entries){
@@ -53,6 +57,7 @@ export function createCartSaver({engine,storageKey,native,onSaved,onIdle,onError
   get pending(){return entries.length>0;},
   get available(){return typeof Worker!=='undefined'&&!failed&&!stopped;},
   save(before,after){
+   watch();
    const next=[...entries,{before,after}];write(next);entries=next;
    clearTimeout(timer);timer=setTimeout(run,100);
    return true;

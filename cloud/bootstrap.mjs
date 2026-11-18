@@ -1,6 +1,6 @@
 import {config} from './config.mjs';
 import {CloudEngine} from './engine.mjs';
-import {createCartSaver,selectionFields} from './cart-save.mjs?v=1';
+import {createCartSaver,selectionFields} from './cart-save.mjs?v=2';
 import {equal} from './records.mjs';
 import {createBackend} from './backend.mjs?v=loading-20261102-1';
 import {PrivateMedia} from './media.mjs?v=avatar-reference-20261110-1';
