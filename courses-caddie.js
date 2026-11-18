@@ -23,6 +23,49 @@ document.addEventListener('click',event=>{
  if(phoneCartCommits.length&&!event.target.closest('.courses-cart-check')&&event.target.closest('button,a,select,input'))commitNextPhoneCartChange();
 },true);
 let lastCartTap=null;
+// Preview touch feedback on contact; only a stationary release commits it.
+let courseTouchGesture=null,courseTouchClick=null;
+function cancelCourseTouch(){
+ const gesture=courseTouchGesture;courseTouchGesture=null;
+ if(!gesture)return;
+ courseTouchClick={input:gesture.input,until:performance.now()+1000};
+ gesture.input.checked=gesture.previous;
+ gesture.input.closest('.courses-line')?.classList.toggle('is-in-cart',gesture.previous);
+}
+document.addEventListener('pointerdown',event=>{
+ courseTouchClick=null;
+ if(event.pointerType!=='touch'||!phoneAppearanceLocked||visualEditSession)return;
+ if(courseTouchGesture){cancelCourseTouch();return;}
+ const input=event.target.closest('.courses-cart-check')?.querySelector('input[data-cart]');
+ if(!input||input.disabled)return;
+ courseTouchGesture={input,previous:input.checked,pointer:event.pointerId,x:event.clientX,y:event.clientY};
+ input.checked=!input.checked;
+ input.closest('.courses-line')?.classList.toggle('is-in-cart',input.checked);
+},{capture:true,passive:true});
+document.addEventListener('pointermove',event=>{
+ const gesture=courseTouchGesture;
+ if(gesture?.pointer===event.pointerId&&Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y)>10)cancelCourseTouch();
+},{capture:true,passive:true});
+document.addEventListener('pointercancel',cancelCourseTouch,{capture:true,passive:true});
+document.addEventListener('pointerup',event=>{
+ const gesture=courseTouchGesture;
+ if(!gesture||gesture.pointer!==event.pointerId)return;
+ const label=gesture.input.closest('.courses-cart-check');
+ if(!gesture.input.isConnected||!label?.contains(event.target)||Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y)>10){cancelCourseTouch();return;}
+ courseTouchGesture=null;
+ courseTouchClick={input:gesture.input,until:performance.now()+1000};
+ gesture.input.dispatchEvent(new Event('input',{bubbles:true}));
+ gesture.input.dispatchEvent(new Event('change',{bubbles:true}));
+},{capture:true,passive:true});
+document.addEventListener('click',event=>{
+ if(event.pointerType!=='touch'&&!event.sourceCapabilities?.firesTouchEvents)return;
+ if(!event.isTrusted||!courseTouchClick||performance.now()>courseTouchClick.until)return;
+ const label=event.target.closest('.courses-cart-check');
+ if(label?.contains(courseTouchClick.input)){
+  event.preventDefault();event.stopImmediatePropagation();courseTouchClick=null;
+ }
+},true);
+document.addEventListener('scroll',cancelCourseTouch,{capture:true,passive:true});
 let phoneCourseScrollTime=-Infinity;
 function phoneCoursesScrolling(){return performance.now()-phoneCourseScrollTime<300;}
 document.addEventListener('scroll',event=>{

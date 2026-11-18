@@ -15,7 +15,16 @@ for(const paused of document.querySelectorAll('script[data-cloud-src]')){
 }
 const native={get:Storage.prototype.getItem,set:Storage.prototype.setItem,remove:Storage.prototype.removeItem};
 const isCache=k=>k.startsWith('bazar-cloud-cache:');
-const store={getItem:k=>{const raw=native.get.call(localStorage,k);return isCache(k)?decodeCache(raw):raw;},setItem:(k,v)=>native.set.call(localStorage,k,isCache(k)?encodeCache(v):v)};
+const store={getItem:k=>{const raw=native.get.call(localStorage,k);return isCache(k)?decodeCache(raw):raw;},setItem:(k,v)=>{
+  if(!isCache(k))return native.set.call(localStorage,k,v);
+  // A mobile cart check must not compress and verify the entire family cache.
+  // Plain JSON uses the same reader; retain compression when storage is full.
+  if(document.documentElement.classList.contains('phone-appearance-locked')&&window.BazarCloud?.currentPage?.()==='Courses'){
+    try{return native.set.call(localStorage,k,v);}
+    catch(error){if(error.name!=='QuotaExceededError')throw error;}
+  }
+  return native.set.call(localStorage,k,encodeCache(v));
+}};
 let legacy=JSON.parse(store.getItem('bazar-organise-v1')||'null');
 const client=window.supabase.createClient(config.url,config.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'bazar-cloud-auth-v1'}});
 const dialog=document.getElementById('dialog');
