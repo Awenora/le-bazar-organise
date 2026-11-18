@@ -4,7 +4,9 @@ export function selectionFields(data){return Object.fromEntries(fields.filter(ke
 function overlay(view,values){const result={...view};for(const key of fields){delete result[key];if(Object.hasOwn(values,key))result[key]=values[key];}return result;}
 export function createCartSaver({engine,storageKey,native,onSaved,onIdle,onError}){
  const key='bazar-cart-journal:'+storageKey;
- let entries=JSON.parse(native.get.call(localStorage,key)||'[]'),worker=null,timer,inFlight=null,failed=false;
+ let entries=JSON.parse(native.get.call(localStorage,key)||'[]'),worker=null,timer,inFlight=null,failed=false,stopped=false;
+ addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);worker?.terminate();worker=null;inFlight=null;});
+ addEventListener('pageshow',event=>{if(event.persisted&&stopped)location.reload();});
  const write=next=>{if(next.length)native.set.call(localStorage,key,JSON.stringify(next));else native.remove.call(localStorage,key);};
  function recover(){
   for(const entry of entries){
@@ -21,12 +23,13 @@ export function createCartSaver({engine,storageKey,native,onSaved,onIdle,onError
  }
  function run(){
   clearTimeout(timer);
-  if(!entries.length||inFlight||failed)return;
+  if(!entries.length||inFlight||failed||stopped)return;
   try{
    if(!worker){
     worker=new Worker(new URL('./cart-save-worker.mjs',import.meta.url),{type:'module'});
     worker.onerror=()=>stop();
     worker.onmessage=event=>{
+     if(stopped)return;
      const result=event.data,batch=inFlight;inFlight=null;
      if(result.error){stop(result.error);return;}
      // Another save or a remote response won the race: merge again on that state.
@@ -48,7 +51,7 @@ export function createCartSaver({engine,storageKey,native,onSaved,onIdle,onError
  return {
   recover,
   get pending(){return entries.length>0;},
-  get available(){return typeof Worker!=='undefined'&&!failed;},
+  get available(){return typeof Worker!=='undefined'&&!failed&&!stopped;},
   save(before,after){
    const next=[...entries,{before,after}];write(next);entries=next;
    clearTimeout(timer);timer=setTimeout(run,100);
