@@ -1,21 +1,27 @@
 const pendingCartChanges=new Set();
 const phoneCartCommits=[];
-let phoneCartCommitTimer;
+let phoneCartCommitTimer,phoneCartBatchSettling=false;
 function commitNextPhoneCartChange(){
- phoneCartCommitTimer=undefined;
- const commit=phoneCartCommits.shift();
- if(commit)commit();
- if(phoneCartCommits.length)phoneCartCommitTimer=setTimeout(commitNextPhoneCartChange,32);
+ clearTimeout(phoneCartCommitTimer);phoneCartCommitTimer=undefined;
+ const changes=phoneCartCommits.splice(0);if(!changes.length)return;
+ const saved=familyCommit(()=>familyShop.withProductReadCache(()=>{
+  for(const change of changes)change.apply();
+ }),false);
+ phoneCartBatchSettling=true;
+ try{for(const change of changes)change.settle(saved);}finally{phoneCartBatchSettling=false;}
+ window.BazarCloud?.tryApply?.();
 }
-function queuePhoneCartCommit(commit){
- phoneCartCommits.push(commit);
- if(phoneCartCommitTimer===undefined)phoneCartCommitTimer=setTimeout(commitNextPhoneCartChange,220);
-}
-window.addEventListener('pagehide',()=>{
+function queuePhoneCartCommit(change){
+ phoneCartCommits.push(change);
  clearTimeout(phoneCartCommitTimer);
- phoneCartCommitTimer=undefined;
- for(const commit of phoneCartCommits.splice(0))commit();
-});
+ phoneCartCommitTimer=setTimeout(commitNextPhoneCartChange,600);
+}
+window.addEventListener('pagehide',commitNextPhoneCartChange);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')commitNextPhoneCartChange();});
+// Finish the pending batch before opening another action or leaving the list.
+document.addEventListener('click',event=>{
+ if(phoneCartCommits.length&&!event.target.closest('.courses-cart-check')&&event.target.closest('button,a,select,input'))commitNextPhoneCartChange();
+},true);
 let lastCartTap=null;
 let phoneCourseScrollTime=-Infinity;
 function phoneCoursesScrolling(){return performance.now()-phoneCourseScrollTime<300;}
@@ -54,13 +60,10 @@ function changeCourseCart(input,wk,item,onSettled,keepDisabled=false){
  const row=input.closest('.courses-line');
  row?.classList.toggle('is-in-cart',desired);
  let completed=false,fallback;
- const commit=()=>{
+ const apply=()=>courseList.setChecked(data,wk,item,desired);
+ const settle=saved=>{
   if(completed)return;
-  completed=true;
-  clearTimeout(fallback);
-  const saved=familyCommit(()=>familyShop.withProductReadCache(()=>{
-   courseList.setChecked(data,wk,item,desired);
-  }),false);
+  completed=true;clearTimeout(fallback);
   pendingCartChanges.delete(key);
   if(input.isConnected&&(!saved||!keepDisabled))input.disabled=false;
   if(!saved){
@@ -69,8 +72,9 @@ function changeCourseCart(input,wk,item,onSettled,keepDisabled=false){
   }
   onSettled(saved);
  };
- // Paint the mobile checkmark before the synchronous save takes the main thread.
- if(keepDisabled){queuePhoneCartCommit(commit);return;}
+ const commit=()=>{if(!completed)settle(familyCommit(()=>familyShop.withProductReadCache(apply),false));};
+ // Consecutive mobile checks share one durable save after the user pauses.
+ if(keepDisabled){queuePhoneCartCommit({apply,settle});return;}
  fallback=setTimeout(commit,100);
  requestAnimationFrame(()=>requestAnimationFrame(commit));
 }
@@ -182,7 +186,7 @@ function checkCourseListItem(input,wk,item,items){
    window.updateCourseCheckout?.(items,wk);
 
   }
-  window.BazarCloud?.tryApply?.();
+  if(!phoneCartBatchSettling)window.BazarCloud?.tryApply?.();
  },!!(phoneAppearanceLocked&&row));
 }
 function coursesCaddieDialog(){const wk=datekey(coursesWeek()),state=courseList.weekState(data,wk),items=shoppingItems().filter(i=>state.checked[i.identity]&&!state.excluded[i.identity]);modal('<h2>Dans mon caddie</h2><p>Décoche un produit pour le remettre dans les courses restantes.</p><div class="cart-rows">'+items.map((item,i)=>'<label class="cart-row"><input type="checkbox" checked data-cart-restore="'+i+'"><strong>'+esc(needsTools.quantity({...item,unit:item.purchaseDisplay?.unit||item.unit},item.purchaseDisplay?item.purchaseDisplay.quantity:item.purchase))+'</strong><span>'+esc(item.name)+'</span></label>').join('')+(!items.length?'<p>Le caddie est vide.</p>':'')+'</div>');document.querySelectorAll('[data-cart-restore]').forEach(input=>input.onchange=()=>{changeCourseCart(input,wk,items[+input.dataset.cartRestore],saved=>{if(saved)lastCartCheck=null;const refreshDialog=input.isConnected&&$('#dialog').open;if(page==='Courses'&&datekey(coursesWeek())===wk)refreshCoursesAtPosition();if(refreshDialog)coursesCaddieDialog();});});}
