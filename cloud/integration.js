@@ -6,7 +6,10 @@
     const keys=Object.keys(a);
     return keys.length===Object.keys(b).length&&keys.every(key=>Object.hasOwn(b,key)&&JSON.stringify(a[key])===JSON.stringify(b[key]));
   }
-  let menuRefreshDeferred=false,courseRefreshTimer;
+  let menuRefreshDeferred=false,viewRefreshTimer,lastViewScroll=-Infinity;
+  document.addEventListener('scroll',event=>{
+    if(event.target===document||event.target.closest?.('#main,#side'))lastViewScroll=performance.now();
+  },{capture:true,passive:true});
   function recipeMenuOpen(){
     const targeted=page==='Carnets'||page==='Recettes'||(page==='À table !'&&tab==='Recettes');
     return document.querySelector('#courseDestinationChoice')||(targeted&&document.querySelector('#sideNotebookMenu,.bazar-action-menu'));
@@ -27,14 +30,54 @@
     const top=el.scrollTop,left=el.scrollLeft;
     if(el===document.scrollingElement)return {find:()=>document.scrollingElement,top,left};
     if(el.id)return {find:()=>document.getElementById(el.id),top,left};
+    if(el.matches('[data-course-primary],[data-sr-table]')){
+      const attr=el.hasAttribute('data-course-primary')?'data-course-primary':'data-sr-table',selector='['+attr+'="'+CSS.escape(el.getAttribute(attr))+'"]';
+      return {find:()=>document.querySelector(selector),top,left};
+    }
     if(el.matches('#side .cards'))return {find:()=>document.querySelector('#side .cards'),top,left};
     // Relative child paths belong to a stable ancestor, never the first matching class.
-    const anchor=el.parentElement?.closest('[id]');if(!anchor)return null;
+    const anchor=el.parentElement?.closest('[id],[data-course-primary],[data-sr-table]');if(!anchor)return null;
     const path=[];for(let node=el;node!==anchor;node=node.parentElement){path.unshift([...node.parentElement.children].indexOf(node));}
-    const id=anchor.id,tag=el.tagName;
-    return {find:()=>{let node=document.getElementById(id);for(const i of path)node=node?.children[i];return node?.tagName===tag?node:null;},top,left};
+    const selector=anchor.id?'#'+CSS.escape(anchor.id):anchor.hasAttribute('data-course-primary')?'[data-course-primary="'+CSS.escape(anchor.dataset.coursePrimary)+'"]':'[data-sr-table="'+CSS.escape(anchor.dataset.srTable)+'"]',tag=el.tagName;
+    return {find:()=>{let node=document.querySelector(selector);for(const i of path)node=node?.children[i];return node?.tagName===tag?node:null;},top,left};
   }
   function restoreScroll(scroll){for(const state of scroll){const node=state.find();if(node){node.scrollTop=state.top;node.scrollLeft=state.left;}}}
+
+  function viewKey(){
+    return JSON.stringify([page,page==='À table !'?[tab,datekey(month),datekey(week),phonePlanningMonth]:null,
+      page==='Courses'?datekey(coursesWeek()):null,page==='Carnets'?openedNotebook:null,
+      page==='Réserves'?stockRoomPrefs().view.locationId:null,page==='Budget'?budgetMonth:null]);
+  }
+  let displayedView=null,renderDepth=0;
+  function preservePosition(fn){return function(...args){
+    if(renderDepth)return fn.apply(this,args);
+    const view=viewKey(),keep=displayedView===view&&!visualEditSession;
+    const scroll=keep?[...document.querySelectorAll('#main,#main *,#side,#side *')].filter(el=>el.scrollTop||el.scrollLeft).map(rememberScroll).filter(Boolean):[];
+    if(keep&&document.scrollingElement&&(document.scrollingElement.scrollTop||document.scrollingElement.scrollLeft))scroll.unshift(rememberScroll(document.scrollingElement));
+    const groups=keep?[...document.querySelectorAll('#main details[id]')].map(el=>[el.id,el.open]):[];
+    const generation=++scrollGeneration,interaction=scrollInteraction;
+    renderDepth++;
+    let result;
+    try{result=fn.apply(this,args);}finally{renderDepth--;displayedView=viewKey();}
+    if(keep&&displayedView===view){
+      for(const [id,open]of groups){const el=document.getElementById(id);if(el?.tagName==='DETAILS')el.open=open;}
+      const restore=()=>{if(generation===scrollGeneration&&interaction===scrollInteraction&&viewKey()===view)restoreScroll(scroll);};
+      restore();
+      requestAnimationFrame(()=>{restore();requestAnimationFrame(restore);});
+    }
+    return result;
+  };}
+  // Local edits and background updates rebuild the same scroll containers.
+  // Preserve their position only within the same page and selected view.
+  render=preservePosition(render);
+  shopping=preservePosition(shopping);
+  planning=preservePosition(planning);
+  catalogPage=preservePosition(catalogPage);
+  notebooks=preservePosition(notebooks);
+  stockRoomRender=preservePosition(stockRoomRender);
+  reserves=preservePosition(reserves);
+  familyRenderStock=preservePosition(familyRenderStock);
+  budgetRender=preservePosition(budgetRender);
   cloud.tryApply=()=>{
     if(busy())return;
     if(cloud.authRequired&&navigator.onLine&&!cloud.reconnecting){
@@ -49,26 +92,17 @@
       $('#cloudRemote').onclick=()=>{exportLocal();cloud.engine.resolve('remote');$('#dialog').close();cloud.sync();};
       $('#cloudLater').onclick=()=>{cloud.conflictMuted=true;$('#dialog').close();};return;
     }
-    const mobileCourses=phoneAppearanceLocked&&page==='Courses';
-    if(mobileCourses&&phoneCoursesScrolling()){
-      clearTimeout(courseRefreshTimer);
-      courseRefreshTimer=setTimeout(()=>cloud.tryApply(),320);
+    if(performance.now()-lastViewScroll<300){
+      clearTimeout(viewRefreshTimer);
+      viewRefreshTimer=setTimeout(()=>cloud.tryApply(),320);
       return;
     }
-    const next=cloud.engine.view();if(same(data,next)||(mobileCourses&&cloud.sameData(data,next)))return;
-    const restoreCourses=rememberPhoneCoursePosition();
-    const scroll=[...document.querySelectorAll('*')].filter(el=>el.scrollTop||el.scrollLeft).map(rememberScroll).filter(Boolean),generation=++scrollGeneration,interaction=scrollInteraction,viewPage=page,viewTab=tab;
+    const next=cloud.engine.view();if(same(data,next)||cloud.sameData(data,next))return;
     cloud.patch(data,next);cloud.applied(data);
     window.BazarAutomaticRestock?.invalidate?.();
     if(typeof budgetEmpty!=='undefined')budgetEmpty=null;
     render();
-    restoreScroll(scroll);
-    restoreCourses();
-    if(mobileCourses)return;
-    // Recipe-grid sizing finishes on animation frames. Restore once it has settled,
-    // but never pull back a user who has started scrolling or changed page meanwhile.
-    const settled=()=>{if(generation===scrollGeneration&&interaction===scrollInteraction&&page===viewPage&&tab===viewTab){restoreScroll(scroll);restoreCourses();}};
-    requestAnimationFrame(()=>{settled();requestAnimationFrame(settled);});
+
   };
   // Whole-database replacement breaks library revision protection even when
   // requested through an old import handler; preserve the file and refuse it.
