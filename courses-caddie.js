@@ -116,7 +116,19 @@ function changeCourseCart(input,wk,item,onSettled,keepDisabled=false){
   onSettled(saved);
  };
  const commit=()=>{if(!completed)settle(familyCommit(()=>familyShop.withProductReadCache(apply),false));};
- // Consecutive mobile checks share one durable save after the user pauses.
+ // Persist just the selection immediately; prepare the full cache off the UI thread.
+ const cloud=window.BazarCloud,receipt=data.shoppingStockReceipts?.[wk]?.[item.identity];
+ if(keepDisabled&&cloud?.cartSelectionsAvailable&&!(receipt?.applied&&!receipt.finalized&&!desired)){
+  const before=cloud.captureCartFields(data);
+  let saved=false;
+  try{apply();saved=cloud.saveCartSelections(before,cloud.captureCartFields(data));}
+  catch(error){
+   for(const field of ['shoppingCaddie','shoppingExcluded','shoppingStockReceipts']){delete data[field];if(Object.hasOwn(before,field))data[field]=before[field];}
+   toast('Enregistrement impossible : la coche a été annulée.');
+  }
+  settle(saved);return;
+ }
+ // Older browsers retain the existing save path.
  if(keepDisabled){queuePhoneCartCommit({apply,settle});return;}
  fallback=setTimeout(commit,100);
  requestAnimationFrame(()=>requestAnimationFrame(commit));
@@ -229,7 +241,7 @@ function checkCourseListItem(input,wk,item,items){
    window.updateCourseCheckout?.(items,wk);
 
   }
-  if(!phoneCartBatchSettling)window.BazarCloud?.tryApply?.();
+  if(!phoneCartBatchSettling&&!window.BazarCloud?.cartSelectionsPending)window.BazarCloud?.tryApply?.();
  },!!(phoneAppearanceLocked&&row));
 }
 function coursesCaddieDialog(){const wk=datekey(coursesWeek()),state=courseList.weekState(data,wk),items=shoppingItems().filter(i=>state.checked[i.identity]&&!state.excluded[i.identity]);modal('<h2>Dans mon caddie</h2><p>Décoche un produit pour le remettre dans les courses restantes.</p><div class="cart-rows">'+items.map((item,i)=>'<label class="cart-row"><input type="checkbox" checked data-cart-restore="'+i+'"><strong>'+esc(needsTools.quantity({...item,unit:item.purchaseDisplay?.unit||item.unit},item.purchaseDisplay?item.purchaseDisplay.quantity:item.purchase))+'</strong><span>'+esc(item.name)+'</span></label>').join('')+(!items.length?'<p>Le caddie est vide.</p>':'')+'</div>');document.querySelectorAll('[data-cart-restore]').forEach(input=>input.onchange=()=>{changeCourseCart(input,wk,items[+input.dataset.cartRestore],saved=>{if(saved)lastCartCheck=null;const refreshDialog=input.isConnected&&$('#dialog').open;if(page==='Courses'&&datekey(coursesWeek())===wk)refreshCoursesAtPosition();if(refreshDialog)coursesCaddieDialog();});});}

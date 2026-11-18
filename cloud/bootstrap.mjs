@@ -1,5 +1,6 @@
 import {config} from './config.mjs';
 import {CloudEngine} from './engine.mjs';
+import {createCartSaver,selectionFields} from './cart-save.mjs?v=1';
 import {equal} from './records.mjs';
 import {createBackend} from './backend.mjs?v=loading-20261102-1';
 import {PrivateMedia} from './media.mjs?v=avatar-reference-20261110-1';
@@ -88,7 +89,7 @@ try{
   // The served preparation copy remains locked; this file is not installed.
   const backend=window.__BAZAR_CLOUD_TEST__?.backend||createBackend(client,household.id,{writes:household.id==='b7322f6b-7918-4e65-996f-ee041d9942ef'});
   const storageKey=await acquireCache(household.id);
-  let uiSnapshot,loaded=false,applyScheduled=false;
+  let uiSnapshot,loaded=false,applyScheduled=false,cartSyncTimer,cartLastInput=-Infinity;
   const engine=new CloudEngine({storage:store,storageKey,remote:backend,notify:()=>{
     if(loaded&&!applyScheduled){applyScheduled=true;queueMicrotask(()=>{applyScheduled=false;window.BazarCloud.tryApply?.();});}
   }});
@@ -96,7 +97,14 @@ try{
   let rows;try{rows=await backend.read();}catch(e){if(!engine.state)throw e;}
   if(rows&&!rows.some(r=>!r.deleted&&r.path.length===1&&r.path[0]==='recipes'))
     throw Error('Ce compte ne contient pas la bibliothèque familiale. Le compte de test doit être utilisé uniquement dans la page d’essais séparée.');
-  if(!engine.state)engine.initialize(rows,legacy||{});else if(rows&&!engine.state.attempt)engine.receive(rows);
+  if(!engine.state)engine.initialize(rows,legacy||{});
+  const cartSaver=createCartSaver({engine,storageKey,native,
+    onSaved:values=>{for(const key of ['shoppingCaddie','shoppingExcluded','shoppingStockReceipts']){delete uiSnapshot[key];if(Object.hasOwn(values,key))uiSnapshot[key]=structuredClone(values[key]);}},
+    onIdle:()=>{clearTimeout(cartSyncTimer);cartSyncTimer=setTimeout(()=>window.BazarCloud?.sync(),1500);},
+    onError:message=>{if(window.BazarCloud)window.BazarCloud.lastError=message;window.toast?.(message);}
+  });
+  cartSaver.recover();
+  if(rows&&!engine.state.attempt)engine.receive(rows);
   if(engine.state.startupDivergence){
     dialog.innerHTML='<h2>Données locales différentes</h2><p>Votre ancienne version locale est conservée. Elle ne sera pas envoyée automatiquement sur les données familiales.</p><button id="cloudExportOld">Exporter la version locale</button><button id="cloudContinue">Afficher les données partagées</button>';
     dialog.querySelector('#cloudExportOld').onclick=()=>{
@@ -117,6 +125,10 @@ try{
   uiSnapshot=engine.view();
   const bridge=window.BazarCloud={engine,client,backend,household:household.id,patch,
     initialData:uiSnapshot,view:()=>engine.view(),uiSnapshot:()=>structuredClone(uiSnapshot),
+    get cartSelectionsPending(){return cartSaver.pending;},
+    get cartSelectionsAvailable(){return cartSaver.available;},
+    captureCartFields:selectionFields,
+    saveCartSelections:(before,after)=>{cartLastInput=performance.now();clearTimeout(cartSyncTimer);return cartSaver.save(before,after);},
     applied:value=>{uiSnapshot=structuredClone(value);},
     // A Stock location is a device preference, not a household data edit.
     saveStockLocation:locationId=>{
@@ -140,6 +152,7 @@ try{
     reconnect:login,
     importRecipeByLink:url=>importRecipeByLink(client,url),
     async sync(){
+      if(cartSaver.pending||(bridge.currentPage?.()==='Courses'&&performance.now()-cartLastInput<1500)){clearTimeout(cartSyncTimer);cartSyncTimer=setTimeout(()=>bridge.sync(),1500);return;}
       if(bridge.syncing){bridge.syncAgain=true;return bridge.syncing;}
       bridge.syncing=(async()=>{
       try{
@@ -230,7 +243,9 @@ try{
       await navigator.locks.request(name,{ifAvailable:true},async lock=>{
         if(!lock)return;
         const other=new CloudEngine({storage:store,storageKey:name,remote:backend});
-        if(!other.state||(!other.pending().length&&!other.state.attempt&&!other.state.conflicts.length))return;
+        if(!other.state)return;
+        createCartSaver({engine:other,storageKey:name,native,onSaved:()=>{},onIdle:()=>{},onError:()=>{}}).recover();
+        if(!other.pending().length&&!other.state.attempt&&!other.state.conflicts.length)return;
         try{await other.flush();if(other.state.conflicts.length)bridge.externalConflict?.(other);}catch{}
       });
     }
