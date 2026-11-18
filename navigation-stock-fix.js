@@ -1,6 +1,6 @@
 /* Une année et une seule navigation communes à toutes les rubriques. */
 const alignBeforeYearEverywhere=alignPlanningHeader;
-alignPlanningHeader=function(){alignBeforeYearEverywhere();const year=$('#plannerYear'),nav=$('#globalNav'),head=$('header');if(!year)return;year.hidden=false;year.textContent=planningYearText();if(page!=='À table !'&&nav&&head){const n=nav.getBoundingClientRect(),h=head.getBoundingClientRect();year.style.left='8px';year.style.width=Math.max(55,n.left-20)+'px';year.style.top=(h.top+Math.max(2,(h.height-33)/2))+'px'}};
+alignPlanningHeader=function(){alignBeforeYearEverywhere();const year=$('#plannerYear'),nav=$('#globalNav'),head=$('header');if(!year)return;year.hidden=false;if(year.textContent!==planningYearText())year.textContent=planningYearText();if(page!=='À table !'&&nav&&head){const n=nav.getBoundingClientRect(),h=head.getBoundingClientRect();year.style.left='8px';year.style.width=Math.max(55,n.left-20)+'px';year.style.top=(h.top+Math.max(2,(h.height-33)/2))+'px'}};
 function trimDuplicateTitles(){document.querySelectorAll('#main>.intro>h2,#main>section.panel>.catalog-heading>h2,#main>section.panel>.toolbar>.courses-title,#main .stock-toolbar>h2').forEach(h=>{if(['Nos recettes','Courses','Stock','Les carnets de famille'].includes(h.textContent.trim()))h.remove()})}
 /* Les actions dans Des idées restent silencieuses, sans masquer les erreurs ailleurs. */
 let quietIdeasAction=false;

@@ -12,7 +12,19 @@
  let buildingCourses=0,layoutPending=false,groupsPending=false,applyPending=false;
  const beforeGroups=applySharedGroups;applySharedGroups=function(...args){if(buildingCourses){groupsPending=true;return;}return beforeGroups.apply(this,args);};
  const beforeLayout=applyCoursesFreeLayout;applyCoursesFreeLayout=function(...args){if(buildingCourses){layoutPending=true;return;}return beforeLayout.apply(this,args);};
- const beforeShopping=shopping;shopping=function(...args){if(visualEditSession)return phase(beforeShopping,this,args);buildingCourses++;try{return phase(beforeShopping,this,args);}finally{if(!--buildingCourses){if(applyPending){applyPending=groupsPending=layoutPending=false;applyVisualPreferences();}else{if(groupsPending){groupsPending=false;applySharedGroups();}if(layoutPending){layoutPending=false;applyCoursesFreeLayout();}}}}};
+ function build(fn,self,args){
+  if(visualEditSession)return phase(fn,self,args);
+  buildingCourses++;
+  try{return phase(fn,self,args);}finally{
+   if(!--buildingCourses){
+    if(applyPending){applyPending=groupsPending=layoutPending=false;applyVisualPreferences();}
+    else{if(groupsPending){groupsPending=false;applySharedGroups();}if(layoutPending){layoutPending=false;applyCoursesFreeLayout();}}
+   }
+  }
+ }
+ window.withCourseReadPhase=fn=>phase(fn,null,[]);
+ const beforeShopping=shopping;shopping=function(...args){return build(beforeShopping,this,args);};
+ const beforeRender=render;render=function(...args){return page==='Courses'?build(beforeRender,this,args):beforeRender.apply(this,args);};
  const beforeApply=applyVisualPreferences;applyVisualPreferences=function(...args){if(buildingCourses){applyPending=true;return;}return phase(beforeApply,this,args);};
  const beforeCaddie=coursesCaddieDialog;coursesCaddieDialog=function(...args){return phase(beforeCaddie,this,args);};
  const beforePending=coursePendingDialog;coursePendingDialog=function(...args){return phase(beforePending,this,args);};

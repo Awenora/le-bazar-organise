@@ -2,6 +2,7 @@
 (function(){
   const cloud=window.BazarCloud;
   cloud.currentPage=()=>page;
+  cloud.interactingWithCourses=()=>page==='Courses'&&(pendingCartChanges.size||courseTouchGesture||phoneCoursesScrolling()||performance.now()-courseLastInput<1200);
   function same(a,b){
     const keys=Object.keys(a);
     return keys.length===Object.keys(b).length&&keys.every(key=>Object.hasOwn(b,key)&&JSON.stringify(a[key])===JSON.stringify(b[key]));

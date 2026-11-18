@@ -67,5 +67,5 @@
   };
  }
  const beforeShopping=shopping;
- shopping=function(...args){const result=beforeShopping.apply(this,args);updateCourseCheckout();return result;};
+ shopping=function(...args){return withCourseReadPhase(()=>{const result=beforeShopping.apply(this,args);updateCourseCheckout();return result;});};
 })();

@@ -61,7 +61,7 @@ function coursesBuildPrimaryTables(){
 function coursesLightToolbar(){
  const bar=$('#main .courses-list-toolbar');if(!bar)return;
  /* Original controls retain their stable editor IDs and all stored preferences. */
- const undo=$('#listUndo');if(undo)undo.hidden=!(typeof coursesUndoStack!=='undefined'&&coursesUndoStack.length);
+ const undo=$('#listUndo');if(undo)undo.hidden=!(window.BazarCloud?.engine?(BazarCloud.engine.state.actions||[]).length:typeof coursesUndoStack!=='undefined'&&coursesUndoStack.length);
 }
 const shoppingBeforeThreeTables=shopping;
 shopping=function(){shoppingBeforeThreeTables();coursesBuildPrimaryTables();coursesLightToolbar();applySharedGroups();};

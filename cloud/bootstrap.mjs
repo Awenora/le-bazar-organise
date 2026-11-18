@@ -153,6 +153,7 @@ try{
     reconnect:login,
     importRecipeByLink:url=>importRecipeByLink(client,url),
     async sync(){
+      if(bridge.interactingWithCourses?.()){clearTimeout(courseSyncTimer);courseSyncTimer=setTimeout(()=>bridge.sync(),1250);return;}
       if(bridge.syncing){bridge.syncAgain=true;return bridge.syncing;}
       bridge.syncing=(async()=>{
       try{

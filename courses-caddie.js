@@ -22,7 +22,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 document.addEventListener('click',event=>{
  if(phoneCartCommits.length&&!event.target.closest('.courses-cart-check')&&event.target.closest('button,a,select,input'))commitNextPhoneCartChange();
 },true);
-let lastCartTap=null;
+let lastCartTap=null,courseLastInput=-Infinity;
 // Preview touch feedback on contact; only a stationary release commits it.
 let courseTouchGesture=null,courseTouchClick=null;
 function cancelCourseTouch(){
@@ -33,6 +33,7 @@ function cancelCourseTouch(){
  gesture.input.closest('.courses-line')?.classList.toggle('is-in-cart',gesture.previous);
 }
 document.addEventListener('pointerdown',event=>{
+ if(page==='Courses')courseLastInput=performance.now();
  courseTouchClick=null;
  if(event.pointerType!=='touch'||!phoneAppearanceLocked||visualEditSession)return;
  if(courseTouchGesture){cancelCourseTouch();return;}
