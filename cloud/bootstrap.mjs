@@ -96,7 +96,20 @@ try{
   let rows;try{rows=await backend.read();}catch(e){if(!engine.state)throw e;}
   if(rows&&!rows.some(r=>!r.deleted&&r.path.length===1&&r.path[0]==='recipes'))
     throw Error('Ce compte ne contient pas la bibliothèque familiale. Le compte de test doit être utilisé uniquement dans la page d’essais séparée.');
-  if(!engine.state)engine.initialize(rows,legacy||{});else if(rows&&!engine.state.attempt)engine.receive(rows);
+  if(!engine.state)engine.initialize(rows,legacy||{});
+  // Recover selections written by the withdrawn cart journal, once per cache.
+  const oldCartJournal='bazar-cart-journal:'+storageKey;
+  const pendingSelections=JSON.parse(native.get.call(localStorage,oldCartJournal)||'[]');
+  const selectionKeys=['shoppingCaddie','shoppingExcluded','shoppingStockReceipts'];
+  for(const entry of pendingSelections){
+    const current=engine.view();
+    if(selectionKeys.every(key=>JSON.stringify(current[key])===JSON.stringify(entry.after[key])))continue;
+    const before={...current},after={...current};
+    for(const key of selectionKeys){delete before[key];delete after[key];if(Object.hasOwn(entry.before,key))before[key]=entry.before[key];if(Object.hasOwn(entry.after,key))after[key]=entry.after[key];}
+    engine.edit(before,after,{page:'Courses'});
+  }
+  if(pendingSelections.length)native.remove.call(localStorage,oldCartJournal);
+  if(rows&&!engine.state.attempt)engine.receive(rows);
   if(engine.state.startupDivergence){
     dialog.innerHTML='<h2>Données locales différentes</h2><p>Votre ancienne version locale est conservée. Elle ne sera pas envoyée automatiquement sur les données familiales.</p><button id="cloudExportOld">Exporter la version locale</button><button id="cloudContinue">Afficher les données partagées</button>';
     dialog.querySelector('#cloudExportOld').onclick=()=>{
