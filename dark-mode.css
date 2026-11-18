@@ -1,0 +1,39 @@
+/* No light-mode overrides. Geometry, photos and saved visual preferences stay intact. */
+.display-mode-toggle{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer}
+.display-mode-toggle input{width:20px;height:20px;margin:0;flex:none}
+html.bazar-dark{
+ color-scheme:dark;
+ --ink:#eee8df;--muted:#c2bab0;--cream:#24272b;--line:#62605b;--green:#a8c5a6;
+ --bazar-bar:#32363a;
+ background:#202326;
+}
+html.bazar-dark body{background-color:#202326!important;background-blend-mode:multiply!important;color:var(--ink)!important}
+html.bazar-dark :is(#main,#side,#dialog,body>header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu){color:var(--ink)!important}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) :where(*){
+ color:var(--ink)!important;border-color:var(--line)!important;
+}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) :is(button,input,select,textarea){
+ color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important;
+ border-color:var(--line)!important;accent-color:#b7cdae;
+}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) :is(input,select,textarea){background-color:#202326!important}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) :is(button,.import){background-color:#34383c!important}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) button:hover{background-color:#454a4e!important}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) :is(button.active,button[aria-pressed=true],button.primary){background-color:#465844!important}
+html.bazar-dark body :is(#main,#side,#dialog,header,footer,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu) button:disabled{opacity:.55}
+html.bazar-dark :is(body>header,dialog,#visualEditorPanel,#weeklyRecipeAward,.bazar-action-menu){background:#24272bf5!important}
+html.bazar-dark dialog::backdrop{background:#000a}
+html.bazar-dark body :is(.panel,.month-panel,.side-panel,.card,.notebook-cover,.notebook-removable,.open-notebook,.shop-store,.courses-table,.sr-table,.budget-panel,.winner,.weekly-award,.notice,.settings-coming){background-color:#292d31!important}
+html.bazar-dark body :is(.weekday,.day,.dayhead,.day-number,.evening,.weekrow,.weekmeal,.date,.tabs,.side-tabs,.courses-table-heading,.courses-primary-category>summary,.courses-arrow-nav,.courses-remaining,.cart-undo,.courses-list-empty,.courses-list-error,.course-column-labels,.sr-header,.sr-page thead,.budget-panel-title,.budget-balance,.budget-category-total,.budget-month-anchor){background-color:#32363a!important}
+html.bazar-dark body :is(.calendar,.day-meals,.courses-board,.courses-workspace,.sr-page,.sr-columns){background-color:transparent!important}
+html.bazar-dark body :is(.courses-line,.sr-page tbody tr,.budget-scroll tbody tr){background-color:#292d31!important}
+html.bazar-dark body :is(.courses-line:nth-child(even),.sr-page tbody tr:nth-child(even),.budget-scroll tbody tr:nth-child(even)){background-color:#303438!important}
+html.bazar-dark body .courses-line.is-in-cart{background-color:#353c36!important}
+html.bazar-dark body .courses-line.is-in-cart .courses-product{color:#b8c0b6!important}
+html.bazar-dark body :is(.calendar .meal,.calendar .meal-content){background-color:#292d31!important}
+html.bazar-dark body .day.current{outline-color:#c8aa7d!important}
+html.bazar-dark body :is(a,a *){color:#c5d9f4!important}
+html.bazar-dark body :is(input,textarea)::placeholder{color:#b4b0ab!important;opacity:1}
+html.bazar-dark body :is(button,a,input,select,textarea):focus-visible{outline-color:#d7bc8e!important}
+
+html.bazar-dark body :is(.weeknav,.calendar .dayhead>b,.calendar .dayhead b,.calendar .holiday-name){background-color:#34383c!important;color:var(--ink)!important}
