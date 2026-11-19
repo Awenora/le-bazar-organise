@@ -16,15 +16,18 @@
 .planning-view .calendar .day>.calendar-event-tags{top:1px!important;transform:none;max-height:36px;gap:1px;z-index:14}
 .calendar-event-tags button{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;line-height:16px}
 .calendar-event-tags button>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.calendar-birthday-icon{font:15px/1 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;flex:0 0 auto}
+.calendar-birthday-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:14px;flex:0 0 auto}
 @media(max-width:480px){.settings-action-grid{grid-template-columns:1fr}}
 /* Libellés sans halo clair. */
 .planning-view #trashZone #toggleTrash,.planning-view .planner-tools #parkingZone>strong,.planning-view .planner-tools.parking-empty #parkingZone>strong{text-shadow:none!important;-webkit-text-stroke:0!important}
 
 /* Event ribbons share the public-holiday colour at the top of the day. */
 #main #calendar .calendar-event-tags button{background:#C5A17A!important;color:#382719!important;-webkit-text-fill-color:#382719!important;border-color:#C5A17A!important}
-#calendar .day:has(>.calendar-event-tags) .dayhead{padding-top:20px}
-#calendar .day:has(>.calendar-event-tags>button+button) .dayhead{padding-top:38px}
+#calendar .day:has(>.calendar-event-tags) .dayhead{padding-top:16px}
+#calendar .day:has(>.calendar-event-tags>button+button) .dayhead{padding-top:30px}
 .planning-view #calendar .day.bazar-public-holiday>.calendar-event-tags{top:15px!important}
-#calendar .day.bazar-public-holiday:has(>.calendar-event-tags) .dayhead{padding-top:34px}
-#calendar .day.bazar-public-holiday:has(>.calendar-event-tags>button+button) .dayhead{padding-top:52px}
+#calendar .day.bazar-public-holiday:has(>.calendar-event-tags) .dayhead{padding-top:30px}
+#calendar .day.bazar-public-holiday:has(>.calendar-event-tags>button+button) .dayhead{padding-top:44px}
+
+#main #calendar .calendar-event-tags button{height:14px!important;min-height:0!important;padding:0 3px!important;font-size:10px!important;line-height:12px!important;gap:3px}
+.planning-view .calendar .day>.calendar-event-tags{max-height:29px}
