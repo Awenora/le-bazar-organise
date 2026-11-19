@@ -16,18 +16,18 @@
 .planning-view .calendar .day>.calendar-event-tags{top:1px!important;transform:none;max-height:36px;gap:1px;z-index:14}
 .calendar-event-tags button{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;line-height:16px}
 .calendar-event-tags button>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.calendar-birthday-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:14px;flex:0 0 auto}
+.calendar-birthday-icon{display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;flex:0 0 auto}
 @media(max-width:480px){.settings-action-grid{grid-template-columns:1fr}}
 /* Libellés sans halo clair. */
 .planning-view #trashZone #toggleTrash,.planning-view .planner-tools #parkingZone>strong,.planning-view .planner-tools.parking-empty #parkingZone>strong{text-shadow:none!important;-webkit-text-stroke:0!important}
 
-/* Event ribbons share the public-holiday colour at the top of the day. */
-#main #calendar .calendar-event-tags button{background:#C5A17A!important;color:#382719!important;-webkit-text-fill-color:#382719!important;border-color:#C5A17A!important}
-#calendar .day:has(>.calendar-event-tags) .dayhead{padding-top:16px}
-#calendar .day:has(>.calendar-event-tags>button+button) .dayhead{padding-top:30px}
+/* Match the public-holiday frame and its compact label. */
+#calendar .day:has(>.calendar-event-tags){position:relative;isolation:isolate}
+#calendar .day:has(>.calendar-event-tags)::after{content:'';position:absolute;inset:1px;border:4px solid #C5A17A;border-radius:8px;pointer-events:none;z-index:5;box-shadow:inset 0 0 0 1px rgba(255,249,239,.8),0 0 0 5px rgba(91,59,34,.95)}
+.planning-view #calendar .day>.calendar-event-tags{top:1px!important;left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:calc(100% - 12px);max-height:29px;display:flex;flex-direction:column;align-items:center;gap:1px}
+#main #calendar .calendar-event-tags button{width:max-content;max-width:100%;height:14px!important;min-height:0!important;padding:1px 6px!important;font:700 9px/12px 'Segoe UI',Arial,sans-serif!important;letter-spacing:.2px;gap:3px;border:0!important;border-radius:0 0 4px 4px!important;background:#C5A17A!important;color:#382719!important;-webkit-text-fill-color:#382719!important}
+#calendar .day:has(>.calendar-event-tags) .dayhead{padding-top:13px}
+#calendar .day:has(>.calendar-event-tags>button+button) .dayhead{padding-top:28px}
 .planning-view #calendar .day.bazar-public-holiday>.calendar-event-tags{top:15px!important}
 #calendar .day.bazar-public-holiday:has(>.calendar-event-tags) .dayhead{padding-top:30px}
-#calendar .day.bazar-public-holiday:has(>.calendar-event-tags>button+button) .dayhead{padding-top:44px}
-
-#main #calendar .calendar-event-tags button{height:14px!important;min-height:0!important;padding:0 3px!important;font-size:10px!important;line-height:12px!important;gap:3px}
-.planning-view .calendar .day>.calendar-event-tags{max-height:29px}
+#calendar .day.bazar-public-holiday:has(>.calendar-event-tags>button+button) .dayhead{padding-top:43px}
